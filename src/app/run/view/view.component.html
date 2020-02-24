@@ -1,0 +1,170 @@
+<div class="viewport ">
+
+  <div class="title text-centered pt-3">
+    <h3>{{form.title}}</h3>
+
+    <p>{{form.description}}</p>
+
+  </div>
+  <form class="p-2" name="frmObj" novalidate onsubmit="return false;">
+
+    <form-view [form]="prevForm" *ngIf="entry?.prev" [data]="entry?.prev" [entry]="entry"></form-view>
+
+    <form-view [form]="form" [data]="entry?.data" [entry]="entry"></form-view>
+
+    <div class="limit-width centered fix-gutter" [class.disabled]="offline">
+      <div class="mt-3">
+        <div class="ball" *ngFor="let tier of form.tiers; let $index=index">
+          <div
+            style="float:left;width:40px;font-weight: bold;position:absolute;background: white; height:40px; border:solid 4px #ccc;color:#ccc; border-radius:50%; font-size:20px; text-align: center; line-height: 32px;">
+            {{$index+1}}
+          </div>
+          <div style="margin-left: 50px; min-height:55px;">
+            <div *ngIf="checkTier(tier)">
+              <div class="card panel-default" #approvalForm="ngForm" ngForm>
+                <div class="card-header p-3">
+                  <h5 class="card-title m-0">{{form.tiers[entry?.currentTier].name}}</h5>
+                </div>
+                <div class="card-body p-3 mb-0" *ngIf="!tier.alwaysApprove">
+                  <div class="form-group">
+                    <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic"
+                      [(ngModel)]="approval.status">
+                      <label ngbButtonLabel class="btn btn-sm btn-outline-secondary" *ngIf="tier.canApprove">
+                        <input type="radio" ngbButton value="approved" [required]="!approval.status"> Approve
+                      </label>
+                      <label ngbButtonLabel class="btn btn-sm btn-outline-secondary" *ngIf="tier.canReject">
+                        <input type="radio" ngbButton value="rejected" [required]="!approval.status"> Reject
+                      </label>
+                      <label ngbButtonLabel class="btn btn-sm btn-outline-secondary" *ngIf="tier.canReturn">
+                        <input type="radio" ngbButton value="returned" [required]="!approval.status"> Return
+                      </label>
+                      <label ngbButtonLabel class="btn btn-sm btn-outline-secondary" *ngIf="tier.canSkip">
+                        <input type="radio" ngbButton value="skip" [required]="!approval.status"> Skip
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-group" *ngIf="tier.canRemark">
+                    <label>Remark</label>
+                    <textarea class="form-control" [(ngModel)]="approval.remark" name="remark" required></textarea>
+                  </div>
+                </div>
+                <div class="card-body p-3">
+
+                  <!--START ADVANCED FORM-->
+                  <div class="row display-flex" *ngIf="tier.section" [init]="updateWatchList(tier.section)">
+                    <ng-container *ngFor="let f of tier.section.items|orderBy:'sortOrder'">
+
+                      <field-edit [ngClass]="f.size||'col-sm-12'" name="{{f.code}}" [field]="form?.items[f.code]"
+                        [lookupList]="lookup[f.code]" [(ngModel)]="approval.data[f.code]"
+                        *ngIf="!form?.items[f.code].hidden && preCheck(form?.items[f.code])"
+                        (valueChange)="fieldChange(approval.data,form?.items[f.code])"
+                        (fileValueChange)="onUpload($event,approval.data,form?.items[f.code])"
+                        [required]="form?.items[f.code]?.v?.required" [maxlength]="form?.items[f.code]?.v?.maxlength"
+                        [minlength]="form?.items[f.code]?.v?.minlength" [pattern]="form?.items[f.code]?.v?.pattern">
+                      </field-edit>
+                    </ng-container>
+                  </div>
+                  <button class="btn btn-round btn-primary" (click)="submitApproval()"
+                    [disabled]="approvalForm.invalid">
+                    <!-- <i class="fa fa-send"></i> -->
+                    <fa-icon [icon]="['fas','paper-plane']" [fixedWidth]="true"></fa-icon>
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="readonly" *ngIf="!checkTier(tier)">
+              <div *ngIf="entry?.approval[tier.id]">
+                <div class="tier-head">
+                  <!-- <i class="fa fa-check"></i> -->
+                  <fa-icon class=" mr-1" [icon]="['fas','check']" [fixedWidth]="true"></fa-icon>
+                  <span style="text-transform: capitalize">
+                    <span class="mr-2"
+                      *ngIf="!tier.alwaysApprove">{{entry?.approval && entry?.approval[tier.id]?.status}}</span>
+                    <strong>{{tier.name}} </strong>
+                  </span>
+                  <span class="pre-line-break" *ngIf="entry?.approval[tier.id].remark"> -
+                    {{entry?.approval[tier.id]?.remark}}</span>
+                  <footer> updated by {{entry?.approval[tier.id].email}} on
+                    {{entry?.approval[tier.id]?.timestamp|date:'medium'}}
+                  </footer>
+                </div>
+                <div class="row display-flex mt-4">
+                  <ng-container *ngFor="let f of tier?.section?.items">
+                    <div [ngClass]="form?.items[f.code].size" *ngIf="!f.hidden">
+                      <div class="form-group" [ngClass]="f.altClass">
+                        <label>{{form?.items[f.code].label}}</label>
+                        <p class="form-control-static">
+                          <field-view [field]="form?.items[f.code]" [value]="entry?.approval[tier.id].data[f.code]">
+                          </field-view>
+                        </p>
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+              <div *ngIf="!entry?.approval[tier.id]">
+                <div class="tier-head">
+                    <fa-icon [icon]="['fas','question']" [fixedWidth]="true"></fa-icon>
+                    Pending
+                    <strong>{{tier.name}}</strong>
+                    <footer *ngIf="tier.showApprover && entry?.approver[tier.id]">by
+                      <span>{{entry?.approver[tier.id]}} <sup>{{tier.type}}</sup></span>
+                    </footer>
+                    <div class="my-1">
+                      <button *ngIf="tier.type=='ASSIGN' && form?.email?.indexOf(user.email)>-1"
+                        class="btn btn-round btn-info" (click)="assignApprover(editApprovalTpl,tier)">
+                        <span *ngIf="entry?.approver[tier.id]">Re-</span>Assign
+                        Approver</button>
+                    </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="limit-width centered mt-3">
+      <button class="btn btn-round btn-primary" [class.disabled]="offline"
+        *ngIf="['drafted','returned'].indexOf(entry?.currentStatus)>-1"
+        routerLink="{{preurl}}/form/{{form.id}}/edit/{{entry?.id}}">
+        <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+        Edit {{form.title}}
+      </button>
+      <button class="btn btn-round btn-danger pull-right" [class.disabled]="offline"
+        *ngIf="['submitted'].indexOf(entry?.currentStatus)>-1" (click)="cancelEntry()">
+        <fa-icon [icon]="['fas','times']" [fixedWidth]="true"></fa-icon>
+        Retract
+      </button>
+      <div class="clearfix"></div>
+    </div>
+  </form>
+
+</div>
+
+
+<ng-template #editApprovalTpl let-c="close" let-d="dismiss">
+  <div #editApprovalForm="ngForm" ngForm>
+
+    <div class="modal-header">
+      <h4 class="modal-title">Assign approver for {{editApprovalData.name}}</h4>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Approver Email</label>
+        <input class="form-control" type="text" name="approver" [(ngModel)]="approver" placeholder="ie: hod@email.com">
+      </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+      <button type="button" class="btn btn-round btn-default" (click)="d()">Close</button>
+      <button type="button" class="btn btn-round btn-primary" [disabled]="editApprovalForm.invalid"
+        (click)="c({tierId:editApprovalData.id, approver:approver})">
+        <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+        Assign Approver
+      </button>
+    </div>
+  </div>
+</ng-template>

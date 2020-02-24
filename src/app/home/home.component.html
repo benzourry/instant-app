@@ -1,0 +1,30 @@
+<div class="sb">
+    <div class="bar">
+        <div class="logo">
+            <img src="assets/icons/logo-w.svg" width="40">
+        </div>
+        <div class="bar-1">
+            <a class="bar-link" routerLink="/design" routerLinkActive="active">
+                <fa-icon [icon]="['fas', 'quidditch']" [fixedWidth]="true"></fa-icon>
+            </a>
+            <a class="bar-link" routerLink="/repo" routerLinkActive="active">
+                <!-- <fa-icon [icon]="['fas', 'th-large']" [fixedWidth]="true"></fa-icon> -->
+                <fa-icon [icon]="['fas', 'shopping-bag']" [fixedWidth]="true"></fa-icon>
+            </a>
+            <a class="bar-link" routerLink="/admin" routerLinkActive="active">
+                <fa-icon [icon]="['fas', 'sliders-h']" [fixedWidth]="true"></fa-icon>
+            </a>
+        </div>
+        <div class="bar-2">
+            <a class="bar-link" [href]="helpLink" target="_blank">
+                <fa-icon [icon]="['far', 'question-circle']" [fixedWidth]="true"></fa-icon>
+            </a>
+            <a class="bar-link" routerLink="/profile" routerLinkActive="active">
+                <fa-icon [icon]="['far', 'user']" [fixedWidth]="true"></fa-icon>
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <router-outlet></router-outlet>
+    </div>
+</div>

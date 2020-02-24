@@ -1,0 +1,67 @@
+.element .element-edit {
+    opacity: 0;
+    z-index: 2;
+}
+
+.element .element-edit .btn {
+    margin: 0 2px;
+}
+
+.element:hover .element-edit {
+    opacity: 1;
+}
+
+.element:hover::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, .3);
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.element .element-item {
+    pointer-events: none !important;
+}
+
+.element:hover .element-item {
+    filter: blur(2px);
+}
+
+
+/* .heading{
+    position: relative;
+    left: -10px;
+    margin: 1rem 0rem;
+    background: rgb(63, 81, 181);
+    color: white;
+    width:100%;
+    padding: 1em;
+}
+.heading::after{
+    content: '';
+  position: absolute;
+  height: 0;
+  width: 0;
+    top: 100%;
+    left: 0px;
+    border-top: 10px solid #7f0000;
+    border-left: 10px solid transparent;
+} */
+.card{
+    /* border: none; */
+    box-shadow:0 .125rem .25rem rgba(0,0,0,.075)!important
+}
+
+.card-header{position:relative}
+.card-header .card-title{line-height: 1;}
+.card-header .card-title::before{
+    content: '';
+    position: absolute;
+    left: 0px;
+    background: #bbb;
+    width: 4px;
+    height: 1em;
+    border-radius: 0px 3px 3px 0px;
+}

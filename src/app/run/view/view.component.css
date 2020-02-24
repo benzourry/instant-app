@@ -1,0 +1,7 @@
+.form-group label, .f-label{
+    font-size: 13px;
+    opacity:.7;
+    z-index:3;
+    line-height:1.5rem;
+    /* padding:0 1px; */
+  }

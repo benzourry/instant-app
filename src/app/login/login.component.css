@@ -1,0 +1,21 @@
+:host{
+    height:100%;
+}
+.wrapper{
+    height: 100%;
+}
+.wrapper-in{
+    max-width:250px
+}
+.btn i{
+    font-size: 1.2em;
+    line-height: 1.2em;
+}
+
+.rounded-50{
+    border-radius: 2rem;
+}
+
+.w-unset{
+    width: unset;
+}

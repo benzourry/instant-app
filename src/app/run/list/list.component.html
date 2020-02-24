@@ -1,0 +1,178 @@
+<div class="title text-centered p-4">
+    <h3>{{dataset?.title}}</h3>
+
+    <p>{{dataset?.description}}</p>
+
+    <input type="search" class="rounded" placeholder="Filter list" [(ngModel)]="searchText" (keyup.enter)="getEntryList(1)">
+    <a *ngIf="dataset?.exportXls" class="ml-1 btn btn-round btn-secondary" target="blank" href="{{base}}/report/export/{{dataset?.id}}/xlsx?email={{user.email}}&filters={{filtersEncoded}}">
+        <fa-icon [icon]="['fas','file-download']" [fixedWidth]="true"></fa-icon>
+    </a>
+    <button class="ml-1 btn btn-round btn-secondary" *ngIf="dataset?.filters && dataset?.filters.length>0" [class.blue]="!checkFilter()" (click)="editFilter(editFilterTpl,filters,true)">
+        <fa-icon [icon]="['fas','filter']" [fixedWidth]="true"></fa-icon>
+    </button>
+
+</div>
+
+
+<div class="limit-width centered">
+    <div class="p-4 text-muted text-centered" *ngIf="itemLoading">
+        <div class="lds-ellipsis">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <div *ngIf="!itemLoading">
+
+        <div class="table-responsive">
+
+            <table class="table table-striped" *ngIf="entryList?.length>0">
+                <thead>
+                    <tr>
+                        <th *ngFor="let item of dataset?.items">{{item.label}}</th>
+                        <th *ngIf="dataset?.showStatus" class="text-center">Status</th>
+                        <th *ngIf="dataset?.showAction">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let i of entryList" [ngClass]="i.currentStatus">
+                        <td *ngFor="let item of dataset.items">
+                            <!-- {{i?.prev?.data[item.code]}} -->
+                            <!-- {{i.prev|json}} -->
+
+                            <field-view [field]="form[item.root]?.items[item.code]" [value]="getVal(form[item.root]?.items[item.code], i, i[item.root])"></field-view>
+                            <!-- <field-view [field]="form[item.root]?.items[item.code]" [value]="i[item.root][item.code]"></field-view> -->
+                            <!-- <field-view *ngIf="item.root=='data'" [field]="form[item.root]?.items[item.code]" [value]="i?.data[item.code]"></field-view>
+                            <field-view *ngIf="item.root=='prev'" [field]="prevForm?.items[item.code]" [value]="i?.prev[item.code]"></field-view> -->
+                            <!-- <field-view *ngIf="item.root=='prev'" [field]="prevForm?.items[item.code]" [value]="i?.prev?[item.code]"></field-view> -->
+                        </td>
+                        <td *ngIf="dataset?.showStatus" class="text-center">
+                            <step-wizard [tiers]="form['data']?.tiers" [approval]="i?.approval" type="mini"></step-wizard>
+                            {{i.currentStatus}}
+                        </td>
+                        <td *ngIf="dataset?.showAction">
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-round btn-secondary ml-1" [class.disabled]="offline" *ngFor="let next of dataset?.next|keyvalue"
+                                    routerLink="{{preurl}}/form/{{next.key}}/prev/{{i.id}}">
+                                    <fa-icon [icon]="['fas','play']" [fixedWidth]="true"></fa-icon> {{next.value}}
+                                </button>
+                                <button class="btn btn-sm btn-round btn-secondary ml-1" ngbTooltip="View Submission" *ngIf="dataset.canView" 
+                                    routerLink="{{preurl}}/form/{{form['data']?.id}}/view/{{i.id}}">
+                                    <fa-icon [icon]="['fas','file']" [fixedWidth]="true"></fa-icon>
+                                </button>
+                                <button class="btn btn-sm btn-round btn-secondary ml-1" [class.disabled]="offline" ngbTooltip="Edit Submission" *ngIf="dataset.canEdit"
+                                    routerLink="{{preurl}}/form/{{form['data']?.id}}/edit/{{i.id}}">
+                                    <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                                </button>
+                                <button class="btn btn-sm btn-round btn-secondary ml-1" [class.disabled]="offline" ngbTooltip="Cancel Submission" *ngIf="dataset.canRetract"
+                                    (click)="cancelEntry(i.id)">
+                                    <fa-icon [icon]="['fas','times']" [fixedWidth]="true"></fa-icon>
+                                </button>
+                                <button class="btn btn-sm btn-round btn-secondary ml-1" [class.disabled]="offline" ngbTooltip="Delete Submission" *ngIf="dataset.canDelete"
+                                    (click)="deleteEntry(i.id)">
+                                    <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                                </button>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detail" *ngIf="entryList?.length==0">
+            <h3>No record</h3>
+
+            <p>The data is currently not available</p>
+        </div>
+    </div>
+
+    <div *ngIf="entryTotal>pageSize" class="text-centered d-flex justify-content-center m-1">
+        <ngb-pagination [collectionSize]="entryTotal" [pageSize]="pageSize" [(page)]="pageNumber" [maxSize]="10" [rotate]="true"
+            (pageChange)="getEntryList(pageNumber)" boundaryLinks="true" directionLinks="true"></ngb-pagination>
+    </div>
+</div>
+
+<ng-template #editFilterTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Filter {{dataset?.title}}</h4>
+    </div>
+    <div class="modal-body">
+        <div>
+            <div>
+                <div *ngFor="let fil of dataset?.filters">
+                    <div class="form-group">
+                        <label>{{fil.label}} <span class="small"  *ngIf="['text','textarea','eval','qr'].indexOf(form[fil.root]?.items[fil.code].type)>-1">(Use '%' as wildcard)</span></label>
+
+                        <input class="form-control" type="text" [(ngModel)]="filtersData['$str~'+fil.root+'~'+fil.code]" *ngIf="['text','textarea','eval','qr'].indexOf(form[fil.root]?.items[fil.code].type)>-1" />
+
+                        <div *ngIf="['checkbox'].indexOf(form[fil.root]?.items[fil.code].type)>-1">
+
+                                <div class="custom-control custom-control-inline custom-radio">
+                                        <input type="radio" class="custom-control-input" [value]="true" id="f-{{fil.code}}-true"
+                                          [checked]="filters['$bool~'+fil.root+'~'+fil.code] === true" name="f-{{fil.code}}"
+                                          (change)=" filters['$bool~'+fil.root+'~'+fil.code] = true;" />
+                                        <label class="custom-control-label" for="f-{{fil.code}}-true">Yes</label>
+                                      </div>
+                                <div class="custom-control custom-control-inline custom-radio">
+                                        <input type="radio" class="custom-control-input" [value]="false" id="f-{{fil.code}}-false"
+                                          [checked]="filters['$bool~'+fil.root+'~'+fil.code] === false" name="f-{{fil.code}}"
+                                          (change)=" filters['$bool~'+fil.root+'~'+fil.code] = false;" />
+                                        <label class="custom-control-label" for="f-{{fil.code}}-false">No</label>
+                                      </div>
+                                <div class="custom-control custom-control-inline custom-radio">
+                                        <input type="radio" class="custom-control-input" [value]="undefined" id="f-{{fil.code}}-undefined"
+                                          [checked]="filters['$bool~'+fil.root+'~'+fil.code] === undefined" name="f-{{fil.code}}"
+                                          (change)=" filters['$bool~'+fil.root+'~'+fil.code] = undefined;" />
+                                        <label class="custom-control-label" for="f-{{fil.code}}-undefined">Any</label>
+                                      </div>
+                        </div>
+
+                        <ng-container *ngIf="['date'].indexOf(form[fil.root]?.items[fil.code].type)>-1">
+                            <div class="input-group flex-nowrap">
+                                <input class="form-control" type="text" [(ngModel)]="filtersData['$range~'+fil.root+'~'+fil.code+'~from']" placeholder="From" (focus)="dfrom.toggle()"
+                                    ngbDatepicker #dfrom="ngbDatepicker">
+                                <div class="input-group-prepend input-group-append">
+                                    <span class="input-group-text">to</span>
+                                </div>
+                                <input class="form-control" type="text" [(ngModel)]="filtersData['$range~'+fil.root+'~'+fil.code+'~to']" placeholder="To" (focus)="dto.toggle()"
+                                    ngbDatepicker #dto="ngbDatepicker">
+                            </div>
+
+                        </ng-container>
+
+                        <ng-container *ngIf="['scaleTo5', 'scaleTo10','number'].indexOf(form[fil.root]?.items[fil.code].type)>-1">
+                            <div class="input-group flex-nowrap">
+                                <input class="form-control" type="number" [(ngModel)]="filtersData['$range~'+fil.root+'~'+fil.code+'~from']" placeholder="From">
+                                <div class="input-group-prepend input-group-append">
+                                    <span class="input-group-text">to</span>
+                                </div>
+                                <input class="form-control" type="number" [(ngModel)]="filtersData['$range~'+fil.root+'~'+fil.code+'~to']" placeholder="To">
+                            </div>
+
+                        </ng-container>
+
+                        <ng-select [items]="lookup[fil.code]" bindLabel="name" bindValue="code" [(ngModel)]="filtersData['$str~'+fil.root+'~'+fil.code+'.code']" *ngIf="['select', 'radio'].indexOf(form[fil.root]?.items[fil.code].type)>-1">
+                        </ng-select>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <div>
+            <button type="button" class="btn btn-round btn-secondary mr-1" (click)="clearFilter()">
+                    <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                    Reset
+                </button>
+            <button type="button" class="btn btn-round btn-primary" (click)="c(filtersData)">
+                <fa-icon [icon]="['fas','check']" [fixedWidth]="true"></fa-icon>
+                Filter
+            </button>
+        </div>
+    </div>
+</ng-template>

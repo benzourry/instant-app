@@ -1,0 +1,22 @@
+<div class="limit-width m-a pt-3 pb-3 pl-2 pr-2">
+
+  <div class="text-center">
+    <img src="{{user.imageUrl}}" class="rounded mb-2 mt-2" style="max-width:100px;">
+
+  </div>
+  <div class="card">
+    <div class="list-group list-group-flush">
+      <div class="list-group-item">
+        <span class="label-span">Name</span>
+        <div>{{user.name}}</div>
+      </div>
+      <div class="list-group-item">
+        <span class="label-span">Email</span>
+        <div>{{user.email}}</div>
+      </div>
+      <div class="list-group-item">
+        <a routerLink="/login"><fa-icon [icon]="['fas','sign-out-alt']" [fixedWidth]="true"></fa-icon> Logout</a>
+      </div>
+    </div>
+  </div>
+</div>

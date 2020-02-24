@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>reka</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script src="oauth-config.js" type="application/javascript"></script>
+    
+    <style>
+        html,body{height:100%}body{margin:0;display:flex;align-items:center;justify-content:center}.lds-ellipsis{display:inline-block;position:relative;width:64px;height:64px}.lds-ellipsis div{position:absolute;top:27px;width:12px;height:30px;border-radius:3px;background:#0747a6;border:2px solid #0747a6;animation-timing-function:cubic-bezier(0,1,1,0)}.lds-ellipsis div:nth-child(1){left:6px;animation:lds-ellipsis1 .6s infinite}.lds-ellipsis div:nth-child(2){left:6px;animation:lds-ellipsis2 .6s infinite}.lds-ellipsis div:nth-child(3){left:26px;animation:lds-ellipsis2 .6s infinite}.lds-ellipsis div:nth-child(4){left:45px;animation:lds-ellipsis3 .6s infinite}@keyframes lds-ellipsis1{0%{transform:skewX(-30deg) scale(0)}100%{transform:skewX(-30deg) scale(1)}}@keyframes lds-ellipsis3{0%{transform:skewX(-30deg) scale(1)}100%{transform:skewX(-30deg) scale(0)}}@keyframes lds-ellipsis2{0%{transform:skewX(-30deg) translate(0,0)}100%{transform:skewX(-30deg) translate(19px,0)}}
+    </style>
+</head>
+
+<body>
+    <div id="loadr" style="flex:1;text-align: center;"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
+    <div id="msg" style="display:none;padding:20px; color: #333; font-family:Arial, Helvetica, sans-serif">
+        <svg xmlns="http://www.w3.org/2000/svg" style="width:2em; margin-right:1em;" class="svg-inline--fa fa-exclamation-triangle fa-w-18 fa-fw" role="img" aria-hidden="true" viewBox="0 0 576 512" focusable="false" data-icon="exclamation-triangle" data-prefix="fas"><path fill="currentColor" d="M 569.517 440.013 C 587.975 472.007 564.806 512 527.94 512 H 48.054 c -36.937 0 -59.999 -40.055 -41.577 -71.987 L 246.423 23.985 c 18.467 -32.009 64.72 -31.951 83.154 0 l 239.94 416.028 Z M 288 354 c -25.405 0 -46 20.595 -46 46 s 20.595 46 46 46 s 46 -20.595 46 -46 s -20.595 -46 -46 -46 Z m -43.673 -165.346 l 7.418 136 c 0.347 6.364 5.609 11.346 11.982 11.346 h 48.546 c 6.373 0 11.635 -4.982 11.982 -11.346 l 7.418 -136 c 0.375 -6.874 -5.098 -12.654 -11.982 -12.654 h -63.383 c -6.884 0 -12.356 5.78 -11.981 12.654 Z" /></svg>
+        <span style="font-size:2em;">Oopss! Sorry</span>
+        <div id="msg-c" style="padding:10px 0px;"></div>
+    </div>
+</body>
+
+<script> var loadr=document.getElementById("loadr"),message=document.getElementById("msg"),messageContent=document.getElementById("msg-c"),gP=function(e){var n=new RegExp("[\\?&]"+e+"=([^&#]*)").exec(location.search);return null===n?"":decodeURIComponent(n[1].replace(/\+/g," "))},token=gP("token");if(token){var identity={access_token:token};window.sessionStorage.setItem("identity",JSON.stringify(identity)),fetch(OAUTH.USER_URI,{headers:{Authorization:"Bearer "+token}}).then(function(e){e.json().then(function(e){e.error?(loadr.style.display="none",message.style.display="block",messageContent.innerHTML=e.error):(window.sessionStorage.setItem("user",JSON.stringify(e)),window.location.href=OAUTH.FINAL_URI)})})}else loadr.style.display="none",message.style.display="block",messageContent.innerHTML=gP("error");</script>
+
+</html>

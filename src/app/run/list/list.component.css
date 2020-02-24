@@ -1,0 +1,9 @@
+.returned {
+    background: rgba(255, 255, 0, .3)
+}
+
+.rejected {
+    background: rgba(255, 0, 0, .3)
+}
+
+.blue{color:blue}

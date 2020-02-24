@@ -1,0 +1,59 @@
+<div class="viewport">
+  <div class="title text-centered pt-3">
+    <h3>{{dashboard?.title}}</h3>
+
+    <p>{{dashboard?.description}}</p>
+  </div>
+
+  <div class="p-2">
+    <div class="limit-width centered fix-gutter">
+
+      <div class="row">
+
+        <ng-container *ngIf="chartData">
+          <ng-container *ngFor="let chart of dashboard?.charts">
+            <div [ngClass]="chart.size">
+              <div class="card mb-2">
+                <div class="card-header p-3">
+                  <h5 class="card-title m-0">{{chart.title}}</h5>
+                  <p class="card-subtitle mt-1" *ngIf="chart.description">{{chart.description}}</p>
+                </div>
+                <div [ngStyle]="{'padding-bottom.%':chart.height}">
+                  <ngx-charts-pie-chart style="position:absolute" scheme="picnic" *ngIf="chart.type=='pie'" [results]="chartData[chart.id]" [legend]="false" [legendTitle]="chart.title"
+                    [explodeSlices]="false" [trimLabels]="false" [labels]="true" [doughnut]="false" (select)="onSelect($event)">
+                  </ngx-charts-pie-chart>
+                  <ngx-charts-pie-chart style="position:absolute" scheme="picnic" *ngIf="chart.type=='doughnut'" [results]="chartData[chart.id]" [legend]="false" [legendTitle]="chart.title"
+                    [explodeSlices]="false" [trimLabels]="false" [labels]="true" [doughnut]="true" (select)="onSelect($event)">
+                  </ngx-charts-pie-chart>
+                  <ngx-charts-bar-vertical style="position:absolute" scheme="picnic" *ngIf="chart.type=='bar'" [results]="chartData[chart.id]" [legend]="false" [legendTitle]="chart.title"
+                    [xAxis]="true" [yAxis]="true" [legend]="false" [showXAxisLabel]="true" [showYAxisLabel]="false"
+                    (select)="onSelect($event)">
+                  </ngx-charts-bar-vertical>
+                  <!-- <ngx-charts-bar-horizontal style="position:absolute" *ngIf="chart.type=='v-bar'" [results]="chartData[chart.fieldCode]" [legend]="false" [legendTitle]="chart.title"
+                    [gradient]="true" [xAxis]="true" [yAxis]="true" [legend]="false" [showXAxisLabel]="true" [showYAxisLabel]="false"
+                    (select)="onSelect($event)">
+                  </ngx-charts-bar-horizontal> -->
+                  
+                  <ngx-charts-line-chart style="position:absolute" scheme="picnic" schemeType="ordinal" *ngIf="chart.type=='line'" [results]="[{name: chart.title,series:chartData[chart.id]}]" [legend]="false"
+                    [legendTitle]="chart.title" [xAxis]="true" [yAxis]="true" [legend]="false" [showXAxisLabel]="false"
+                    [showYAxisLabel]="false" [xAxisLabel]="chart.fieldValue" [yAxisLabel]="chart.fieldCode" [autoScale]="true" (select)="onSelect($event)"
+                  >
+                  </ngx-charts-line-chart> 
+                  <ngx-charts-area-chart style="position:absolute" scheme="picnic" schemeType="ordinal" *ngIf="chart.type=='area'" [results]="[{name: chart.title,series:chartData[chart.id]}]" [legend]="false"
+                    [legendTitle]="chart.title" [xAxis]="true" [yAxis]="true" [legend]="false" [showXAxisLabel]="false"
+                    [showYAxisLabel]="false" [xAxisLabel]="chart.fieldValue" [yAxisLabel]="chart.fieldCode" [autoScale]="true" (select)="onSelect($event)"
+                  >
+                  </ngx-charts-area-chart> 
+                </div>
+              </div>
+            </div>
+
+          </ng-container>
+        </ng-container>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

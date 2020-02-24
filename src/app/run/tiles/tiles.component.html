@@ -1,0 +1,84 @@
+<div class="cover text-centered p-4">
+    <h3>{{app?.title}}</h3>
+    <p>{{app?.description}}</p>
+    <div class="p-20" *ngIf="formList && formList.length>0">
+        <input type="search" class="start" placeholder="Filter list" [(ngModel)]="searchText" name="searchText">
+    </div>
+    <div class="p-20 text-muted" *ngIf="formList && formList.length==0">
+        <h3>No modules currently available</h3>
+    </div>
+
+</div>
+
+<div class="single-content">
+    <div style="max-width:680px;margin:0 auto;">
+        <div *ngFor="let form of formList|filter:searchText">
+            <div class="s-icon-heading">
+                {{form.title}}
+            </div>
+            <div class="s-icon-wrap">
+                <ng-container *ngFor="let dash of form?.dashboards">
+                    <a class="s-icon" routerLink="dashboard/{{dash.id}}"
+                        *ngIf="!dash.access||dash.access.indexOf(user.email)>-1" routerLinkActive="active">
+                        <fa-icon [icon]="['fas','tachometer-alt']" size="4x" [fixedWidth]="true"></fa-icon>
+                        <div class="title">{{dash.title}}</div>
+                        <div class="sub">{{dash.description}}</div>
+                    </a>
+                </ng-container>
+
+                <!-- <ng-container *ngFor="let sc of form?.screens">
+                        <label class="s-icon" for="screen-{{sc.id}}" style="display: block;margin-bottom: unset" *ngIf="sc.type=='qr'">
+                            <input type="file" [hidden]="true" id="screen-{{sc.id}}" (change)="qrValueChanged($event, sc.actions[0])"
+                                [(ngModel)]="file" name="screen-{{sc.id}}" accept="image/*" capture />
+                            <a routerLinkActive="active" (click)="qr">
+                                <fa-icon [icon]="['fas','qrcode']" size="4x" [fixedWidth]="true"></fa-icon>
+                                <div class="title">{{sc.title}}</div>
+                                <div class="sub">{{sc.description}}</div>
+                            </a>
+                        </label>
+                    </ng-container> -->
+
+                <ng-container *ngFor="let sc of form?.screens">
+                    <span class="s-icon" (click)="qrScanDialog(qrScanTpl,sc.actions[0])" *ngIf="sc.type=='qr'"
+                        routerLinkActive="active">
+                        <fa-icon [icon]="['fas','qrcode']" size="4x" [fixedWidth]="true"></fa-icon>
+                        <div class="title">{{sc.title}}</div>
+                        <div class="sub">{{sc.description}}</div>
+                    </span>
+                </ng-container>
+
+                <ng-container *ngIf="form?.type=='db'">
+
+                    <a class="s-icon" *ngIf="!form?.hideForm || form.admin.indexOf(user.email)>-1"
+                        [class.disabled]="offline || form?.inactive" routerLink="form/{{form.id}}/add">
+                        <fa-icon [icon]="['fas','plus-square']" size="4x" [fixedWidth]="true"></fa-icon>
+                        <div class="title">New {{form.title}}</div>
+                        <div class="sub" *ngIf="!form?.inactive">Add New {{form.title}}</div>
+                        <span class="sub text-danger" *ngIf="form?.inactive">Open within:
+                            {{form?.startDate|date:'medium'}} - {{form?.endDate|date:'medium'}}</span>
+                    </a>
+                </ng-container>
+
+                <ng-container *ngFor="let ds of form.datasets">
+                    <a class="s-icon" routerLink="form/{{form.id}}/list/{{ds.id}}"
+                        *ngIf="!ds?.adminOnly||form?.admin.indexOf(user.email)>-1">
+                        <fa-icon [icon]="['fas','list']" *ngIf="ds.type=='all'" size="4x" [fixedWidth]="true"></fa-icon>
+                        <fa-icon [icon]="['fas','list-ol']" *ngIf="ds.type=='user'" size="4x" [fixedWidth]="true">
+                        </fa-icon>
+                        <fa-icon [icon]="['fas','table']" *ngIf="ds.type=='admin'" size="4x" [fixedWidth]="true">
+                        </fa-icon>
+                        <fa-icon [icon]="['fas','check-square']" *ngIf="ds.type=='action'" size="4x"
+                            [fixedWidth]="true"></fa-icon>
+                        <div class="title">{{ds.title}}</div>
+                        <div class="sub">{{ds.description}}</div>
+                        <div class="badge" *ngIf="badge && badge[ds.id]">{{badge && badge[ds.id]}}</div>
+                    </a>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #qrScanTpl let-c="close" let-d="dismiss">
+    <app-scan (valueChange)="qrValueChange($event,d)"></app-scan>
+</ng-template>

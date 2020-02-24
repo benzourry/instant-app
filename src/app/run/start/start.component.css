@@ -1,0 +1,141 @@
+
+  /* iris app-nav */
+body{
+  font-size: .875rem;
+}
+
+.menu {
+  color: white;
+}
+
+.menu a {
+  font-size: .875rem;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  padding: .7rem 1rem;
+  text-align: left;
+  position: relative;
+}
+.menu .badge{
+  margin-top:3px;
+}
+.menu a fa-icon{
+  color: rgba(255,255,255,.5);
+  min-width: 1.5rem;
+  display: inline-block;
+}
+
+.menu a.active{
+  background: rgba(0,0,0,.1);
+}
+
+.menu a.active::after {
+  content: '';
+  position: absolute;
+  right: 0px;
+  top: 25%;
+  width: 5px;
+  height: 50%;
+  background: #fff;
+  border-radius: 4px 0px 0px 4px;
+}
+
+.menu .menu-heading {
+  font-size: .875rem;
+  /* text-transform: uppercase; */
+  padding: .7rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.app-info{
+  /* background: rgba(255,255,255,.05); */
+}
+
+.app-nav {
+  color: #f8f9fa;
+  background: #0747a6;
+  flex: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 0px;
+  /* overflow: auto; */
+}
+/* Layout for sidemenu*/
+
+.wrapper {
+  height: 100%;
+}
+
+.app-menu{
+  padding-bottom: 1rem;
+}
+/* For Sidemenu */
+@media screen and (min-width: 640px) {
+    .sidemenu.wrapper {
+        display: flex;
+    }
+
+    .sidemenu .app-nav {
+        max-width: 250px;
+        /* max-width:300px; */
+        overflow: auto;
+        /* border-right: solid 1px #ddd; */
+    }
+
+    .sidemenu .content {
+        height: 100%;
+        overflow: auto;
+    }
+}
+
+/* For Topnav */
+
+@media screen and (min-width: 640px) {
+  .app-menu{
+    padding-bottom: 0;
+  }
+    .topnav.wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .topnav .app-nav {
+        flex-grow: 0;
+        text-align: center;
+        /* border-bottom: solid 1px #ddd; */
+    }
+
+    .topnav .content {
+        height: 100%;
+        /* overflow: auto; */
+    }
+
+    .topnav .menu-items{
+      box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+      position:absolute;
+      top:100%;left: 0;
+      background: white;
+      z-index:10;
+    }
+
+    .topnav .menu {
+      /* float: left; */
+      display: inline-block;
+      position: relative;
+    }
+    
+    .topnav .menu a {
+      color: black;
+      white-space: nowrap;
+    }
+
+    .topnav .menu a fa-icon{
+      color: rgba(0,0,0,.5);
+    }
+    
+}

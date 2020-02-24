@@ -1,0 +1,444 @@
+/* You can add global styles to this file, and also import other style files */
+/* * Base structure, mobile first */
+/* load Open Sans Font from local */
+/* @import url(assets/fonts/font.css); */
+/* @import "~@angular/material/prebuilt-themes/indigo-pink.css";
+ */
+/* Move down content because we have a fixed navbar that is 60px tall */
+ html,body {
+    overscroll-behavior-y: contain;
+}
+ html{
+     height:100%;
+     padding-top: 0px;
+}
+ body {
+    /* padding-top: 60px;
+    */
+     background-color: whitesmoke;
+     color: #000;
+     /* font-family: 'Open Sans',sans-serif; */
+     font-family: Verdana, Arial, Helvetica, sans-serif;
+    /*font-size: 13px;
+    */
+     direction: ltr;
+     margin: 0;
+    /*padding-top: 60px;
+    */
+    /**/
+     height:100%;
+}
+ .tab-custom > .tab-content {
+     border-top:none;
+    /* padding: .75rem;
+     */
+}
+ .single-pane{
+     padding: .75rem;
+}
+ .tab-custom .nav-tabs {
+     border-bottom: none;
+    /*3px solid #DDD;
+    */
+}
+ .tab-custom .nav-tabs .nav-item .nav-link.active, .tab-custom .nav-tabs .nav-item .nav-link.active:focus, .tab-custom .nav-tabs .nav-item .nav-link.active:hover {
+     border-width: 0;
+}
+ .tab-custom .nav-tabs .nav-item{
+     padding: 0rem .7rem;
+}
+ .tab-custom .nav-tabs .nav-item .nav-link {
+     border: none;
+     color: #666;
+     position: relative;
+     padding: .5rem 0rem;
+    /* text-transform: uppercase;
+     */
+     font-weight: 500;
+}
+ .tab-custom .nav-tabs .nav-item .nav-link.active, .tab-custom .nav-tabs .nav-item .nav-link:hover {
+     border: none;
+     color: #4285F4 !important;
+     background: transparent;
+}
+ .tab-custom .nav-tabs .nav-item .nav-link::after {
+     content: "";
+     background: #4285F4;
+     height: 3px;
+     border-radius:3px;
+     position: absolute;
+     width: 100%;
+     left: 0px;
+     bottom: 0px;
+     transition: all 250ms ease 0s;
+     transform: scale(0);
+}
+ .tab-custom.no-tabs .nav-tabs{
+     display: none !important;
+}
+ .tab-custom .nav-tabs .nav-item .nav-link.active::after, .tab-custom .nav-tabs .nav-item:hover .nav-link::after {
+     transform: scale(1);
+}
+ .tab-custom .tab-nav li a::after {
+     background: #21527d none repeat scroll 0% 0%;
+     color: #fff;
+}
+/* .white-panel{
+     margin:0px;
+     background: #fff;
+     padding:15px;
+}
+ */
+ .pagination{
+    margin: 5px;
+}
+ .btn[disabled] {
+     pointer-events: none !important;
+}
+ .disabled{
+     pointer-events: none !important;
+     opacity: .5;
+}
+/*Override datepicker ugly btn border*/
+/* td[id^='datepicker-'] button{
+     border:none;
+}
+ */
+ .highlightedText,.ui-select-highlight {
+     background: yellow;
+}
+ .fix-gutter .row {
+     margin-right: -.37rem;
+     margin-left: -.37rem;
+}
+ .fix-gutter .row > [class^="col-"], .fix-gutter .row > [class*=" col-"], .fix-gutter .row > [class="col"] {
+     padding-right: .37rem;
+     padding-left: .37rem;
+}
+ .modal-content{
+     box-shadow:none;
+}
+/* .modal-backdrop {
+     */
+    /*background-color: #fff;
+    */
+    /* 
+}
+ */
+/* .form-control {
+     box-shadow: none;
+}
+ .flash-message{
+     position: fixed;
+     bottom: 0px;
+     right: 0px;
+     padding: 0px 15px;
+     font-size:14px;
+     float: right;
+     z-index: 1051;
+     transition: all .5s ease;
+}
+ .flash-message .alert{
+     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3) ;
+     border-radius: 0;
+     border:solid 1px;
+     transition: all .5s ease;
+}
+ */
+ .limit-width {
+     max-width: 780px;
+}
+.limit-width.repo {
+    max-width: 710px;
+}
+ .limit-width.centered{
+     margin-left: auto;
+     margin-right: auto;
+}
+.vertical-text {
+	transform: rotate(270deg);
+	transform-origin: left top 0;
+}
+/*@media {
+    */
+    /**/
+    /*
+}
+*/
+ @media (max-width: 576px) {
+     .modal-dialog {
+         margin: 0px;
+         height:100%;
+         min-width: 100%;
+    }
+     .modal-content{
+         min-height:100%;
+    }
+}
+ .modal-content {
+     border:none;
+     border-radius: 0;
+}
+ .detail{
+     padding:20px;
+     text-align: center;
+}
+ .btn-round-lg{
+     border-radius: 22.5px;
+}
+ .btn-round{
+     border-radius: 20px;
+     padding: 6px 8px;
+}
+ .btn-sm.btn-round{
+     border-radius: 18px;
+     padding: 5px 7px;
+}
+ .btn-round-xs{
+     border-radius: 11px;
+    /* padding-left: 10px;
+     padding-right: 10px;
+     */
+}
+.btn-group-xs > .btn, .btn-xs {
+    padding  : .25rem .4rem;
+    font-size  : .875rem;
+    line-height  : 1;
+    border-radius : .2rem;
+}
+ .head{
+     position: sticky;
+    font-size: 18px;
+     top:0;
+     background: #fff;
+     border-bottom:#ccc;
+     z-index:11;
+     box-shadow: 0px 4px 8px -3px rgba(17, 17, 17, .06);
+}
+ .head .title{
+     float: left;
+     padding: 20px 15px;
+     font-size: 18px;
+     line-height: 20px;
+}
+ .head a{
+     margin: 12px;
+}
+ .head a i{
+     line-height: 20px;
+     font-size:20px;
+}
+ .text-centered{
+     text-align: center 
+}
+ input.rounded {
+     outline: none;
+}
+ input.rounded[type=search] {
+     -webkit-appearance: textfield;
+     -webkit-box-sizing: content-box;
+     font-family: inherit;
+     font-size: 100%;
+}
+ input.rounded::-webkit-search-decoration, input.rounded::-webkit-search-cancel-button {
+     display: none;
+    /* remove the search and cancel icon */
+}
+/* search input field */
+ input.rounded[type=search] {
+     background: #ccc url(assets/img/search-icon.png) no-repeat 9px center;
+     border: solid 1px #ccc;
+     padding: 6px 10px 6px 32px;
+     width: 40px;
+     vertical-align: middle;
+     -webkit-border-radius: 10em;
+     -moz-border-radius: 10em;
+     border-radius: 10em !important;
+     -webkit-transition: all .5s;
+     -moz-transition: all .5s;
+     transition: all .5s;
+}
+ input.rounded[type=search]:focus {
+     width: 130px;
+     background-color: #fff;
+     border-color: #ccc;
+    /* -webkit-box-shadow: 0 0 5px rgba(109,207,246,.5);
+     -moz-box-shadow: 0 0 5px rgba(109,207,246,.5);
+     box-shadow: 0 0 5px rgba(109,207,246,.5);
+     */
+}
+/* placeholder */
+ input.rounded:-moz-placeholder {
+     color: #999;
+}
+ input.rounded::-webkit-input-placeholder {
+     color: #999;
+}
+ .ball{
+     position:relative;
+     padding-bottom: 20px;
+}
+ .ball::before{
+     content:'';
+     position: absolute;
+     left:18px;
+     width:4px;
+     top:40px;
+     bottom: 0px;
+     background: #ccc;
+}
+ .ball:last-child::before{
+     display: none;
+}
+ .ball .readonly .tier-head{
+     font-size: 17.5px;
+}
+ .ball footer{
+     display: block;
+     font-size: 80%;
+     line-height: 1.42857143;
+     color: #777;
+}
+ .ball footer:before {
+     content: '\2014 \00A0';
+}
+/* .p-20{
+     padding: 20px;
+}
+ */
+ .m-a{
+    margin: 0 auto;
+}
+ .a-check {
+     padding: 5px;
+     font-size: 14px;
+     display: block;
+     color: #000;
+}
+ .a-check .fa {
+     font-size: 16px;
+     line-height: 100%;
+     font-weight: bold;
+     margin-right: 15px;
+}
+ .a-check.on .fa {
+     color: #337ab7 
+}
+ .a-check.off .fa {
+     color: #000;
+}
+ .pagination-sm .page-link {
+     padding: .1rem .5rem;
+     font-size: .875rem;
+    /* line-height: 1.5;
+     */
+}
+ .pointer{
+     cursor: pointer;
+}
+ .badge{
+     color: white;
+}
+ .card-subtitle {
+     font-weight: 300;
+}
+ @keyframes blinker {
+     50% {
+         opacity: 0;
+    }
+}
+ .blink_me {
+     animation: blinker 1s linear infinite;
+}
+ .lds-ellipsis {
+     display: inline-block;
+     position: relative;
+     width: 64px;
+     height: 64px;
+}
+ .lds-ellipsis div {
+     position: absolute;
+     top: 27px;
+     width: 13px;
+     height: 30px;
+     border-radius: 3px;
+     background:rgb(7, 71, 166);
+    /* #fff;
+    */
+     border: solid 2px rgb(7, 71, 166);
+     animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+ .lds-ellipsis.white div{
+     background: white;
+     border: solid 2px white;
+}
+ .lds-ellipsis div:nth-child(1) {
+     left: 6px;
+     animation: lds-ellipsis1 0.6s infinite;
+}
+ .lds-ellipsis div:nth-child(2) {
+     left: 6px;
+     animation: lds-ellipsis2 0.6s infinite;
+}
+ .lds-ellipsis div:nth-child(3) {
+     left: 26px;
+     animation: lds-ellipsis2 0.6s infinite;
+}
+ .lds-ellipsis div:nth-child(4) {
+     left: 45px;
+     animation: lds-ellipsis3 0.6s infinite;
+}
+ @keyframes lds-ellipsis1 {
+     0% {
+         transform: skewX(-30deg) scale(0);
+    }
+     100% {
+         transform: skewX(-30deg) scale(1);
+    }
+}
+ @keyframes lds-ellipsis3 {
+     0% {
+         transform: skewX(-30deg) scale(1);
+    }
+     100% {
+         transform: skewX(-30deg) scale(0);
+    }
+}
+ @keyframes lds-ellipsis2 {
+     0% {
+         transform: skewX(-30deg) translate(0, 0);
+    }
+     100% {
+         transform: skewX(-30deg) translate(19px, 0);
+    }
+}
+ .table th{
+     font-size:12px;
+     text-transform: uppercase;
+}
+ .table td{
+     font-size: 14px;
+}
+
+
+.rounded .page-link {
+    border-radius: 1.5em;
+    margin: 0 1px;
+    min-width: 2em;
+    line-height: 1;
+}
+
+.rounded .page-item:last-child .page-link {
+    border-top-right-radius: 1.5rem;
+    border-bottom-right-radius: 1.5rem;
+}
+.rounded .page-item:first-child .page-link {
+    border-top-left-radius: 1.5rem;
+    border-bottom-left-radius: 1.5rem;
+}
+
+.nobreak{
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}

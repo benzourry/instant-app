@@ -1,0 +1,516 @@
+<div class="wrapper">
+  <div class="limit-width repo centered">
+    <div class="repo-title text-centered p-3 pt-0">
+
+      <h4>App Designer</h4>
+      <!-- <div>Edit or Create New App</div> -->
+
+    </div>
+    <div class="repo-tool text-centered">
+      <div class="tool-container" style="max-width:480px;margin:auto">
+
+        <input type="search" class="rounded" placeholder="Filter list" [(ngModel)]="searchText"
+          (keydown.enter)="getItemList(1)">
+        <!-- <button class="btn btn-round btn-success ml-1" [class.disabled]="offline"
+          (click)="editItem(editItemTpl,{useGoogle:true,useUnimas:true},true)">
+          <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+          New App
+        </button> -->
+
+        <button class="btn btn-round btn-secondary ml-1" name="btnActivateSpeechSearchMovie"
+          id="btnActivateSpeechSearchMovie" (click)="activateSpeechSearchMovie()" [disabled]="!showSearchButton">
+          <fa-icon [icon]="['fas','microphone']" [fixedWidth]="true"></fa-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="repo-item">
+      <div class="repo-title">
+        <fa-icon [icon]="['fas','plus-square']" [fixedWidth]="true"></fa-icon> Create New App
+      </div>
+
+
+
+      <div class="tile-wrap">
+        <div class="tile bg-success text-white" style="text-overflow: ellipsis; height:100px"
+          [class.disabled]="offline">
+          <div class="notch"
+            style="width:20px; color:white; text-align: center; border-radius:0;top:0; bottom:0; height:unset; background-color: darkgray">
+            <fa-icon [icon]="['fas','plus']"></fa-icon>
+          </div>
+          <div class="tile-mid" style="padding:10px;padding-left:30px;">
+            <div class="tile-content">
+
+              <h6 class="list-group-item-heading">Blank</h6>
+              <p class="desc">Create from scratch</p>
+            </div>
+
+            <div class="tile-action">
+              <button class="btn btn-primary btn-round stack" (click)="editItem(editItemTpl,{useGoogle:true},true)">
+                <fa-icon class="mb-3" [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 text-muted text-centered d-flex" style="align-items:center" *ngIf="!tplLoading && tplTotal==0">
+          No other template available
+        </div>
+
+        <div class="text-muted text-centered d-flex" style="width: 160px;margin: 8px;" *ngIf="tplLoading">
+          <div class="lds-ellipsis">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <ng-container *ngIf="!tplLoading && tplTotal>0">
+          <div class="tile" *ngFor="let item of tplList | filter:searchText; let $index=index"
+            style="text-overflow: ellipsis; height:100px" [class.disabled]="offline">
+            <div class="notch"
+              style="width:20px; color:white; text-align: center; border-radius:0;top:0; bottom:0; height:unset; background-color: darkgray">
+              <fa-icon [icon]="['fas','plus']"></fa-icon>
+              <div class="vertical-text" style="font-weight:bold;font-size:12px;position:absolute; bottom:-10px;">
+                TEMPLATE</div>
+            </div>
+            <div class="tile-image"
+              [ngStyle]="item.logo && {'background-image':'url('+baseApi+'/app/logo/'+item.logo+')'}"></div>
+            <div class="tile-mid" style="padding:10px;padding-left:30px;">
+              <div class="tile-content">
+
+                <h6 class="list-group-item-heading">{{item.title}}
+                </h6>
+                <p class="desc">{{item.description}}</p>
+              </div>
+
+              <div class="tile-action">
+                <div>
+                  <button class="btn btn-primary btn-round mb-2 stack" (click)="cloneItem(editItemTpl,item, true)">
+                    <fa-icon class="icon" [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon> Create
+                  </button>
+                  <div class="" *ngIf="item.email.indexOf(user.email)">
+                    <button class="btn btn-secondary btn-round" [class.disabled]="offline"
+                      routerLink="/design/{{item.id}}">
+                      <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                    </button>
+                    <button class="btn btn-light btn-round ml-2" (click)="editItem(editItemTpl,item)">
+                      <fa-icon [icon]="['fas','cog']" [fixedWidth]="true"></fa-icon>
+                    </button>
+                    <button class="btn btn-danger btn-round ml-2" [class.disabled]="offline"
+                      (click)="removeItem(removeItemTpl,item)">
+                      <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+
+      </div>
+      <div *ngIf="tplTotal>pageSizeTpl" class="d-flex justify-content-center p-3 rounded">
+        <ngb-pagination [collectionSize]="tplTotal" [pageSize]="pageSizeTpl" [(page)]="pageNumberTpl" [maxSize]="4"
+          [rotate]="true" (pageChange)="getTplList(pageNumberTpl)" [boundaryLinks]="true" [directionLinks]="false">
+        </ngb-pagination>
+      </div>
+    </div>
+
+
+
+
+    <div class="repo-item">
+      <div class="repo-title">
+        <fa-icon [icon]="['fas','th-large']" [fixedWidth]="true"></fa-icon> My App Collection
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="itemLoading">
+        <div class="lds-ellipsis">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="!itemLoading && itemTotal==0">
+        <h1>:(</h1>
+        <h4>No application available</h4>
+      </div>
+      <div class="tile-wrap" *ngIf="!itemLoading && itemTotal>0">
+        <div class="tile" *ngFor="let item of itemList | filter:searchText; let $index=index"
+          style="text-overflow: ellipsis">
+          <div class="notch" [ngStyle]="{'background-color':item.theme}"></div>
+          <div class="tile-image"
+            [ngStyle]="item.logo && {'background-image':'url('+baseApi+'/app/logo/'+item.logo+')'}"></div>
+          <div class="tile-mid">
+            <div class="tile-content">
+
+              <h6 class="list-group-item-heading">{{item.title}}
+              </h6>
+
+              <p>
+                <!-- <fa-icon [icon]="['fas','bar-chart']" *ngIf="['chart'].indexOf(item.reportItemElementList)>-1" [fixedWidth]="true"></fa-icon> -->
+                <!-- <i class="fa fa-bar-chart" *ngIf="['chart'].indexOf(item.reportItemElementList)>-1"></i> -->
+              </p>
+              <p class="desc">{{item.description}}</p>
+            </div>
+
+            <div class="tile-action">
+              <div>
+                <button class="btn btn-primary btn-round mb-2 stack" [class.disabled]="offline"
+                  routerLink="/design/{{item.id}}">
+                  <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                  Edit App
+                </button>
+                <button class="btn btn-light btn-round mb-2 stack" (click)="editItem(editItemTpl,item)">
+                  <fa-icon [icon]="['fas','cog']" [fixedWidth]="true"></fa-icon>
+                  Properties
+                </button>
+                <button class="btn btn-danger btn-round stack" [class.disabled]="offline"
+                  (click)="removeItem(removeItemTpl,item)">
+                  <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- <div class="position-absolute p-2 text-center text-white" *ngIf="item.status=='template'"
+              [ngStyle]="{'background-color':item.theme}" style="bottom: 0px; left:0; right:0; background-color: gray">
+              <fa-icon [icon]="['fas','asterisk']" [fixedWidth]="true"></fa-icon>
+              Template
+            </div> -->
+          </div>
+
+        </div>
+      </div>
+      <div *ngIf="itemTotal>pageSize" class="d-flex justify-content-center p-3 rounded">
+        <ngb-pagination [collectionSize]="itemTotal" [pageSize]="pageSize" [(page)]="pageNumber" [maxSize]="4"
+          [rotate]="true" (pageChange)="getItemList(pageNumber)" [boundaryLinks]="true" [directionLinks]="false">
+        </ngb-pagination>
+      </div>
+    </div>
+    <div class="repo-item">
+      <div class="repo-title">
+        <fa-icon [icon]="['fas','share-alt-square']" [fixedWidth]="true"></fa-icon> Shared by others
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="sharedLoading">
+        <div class="lds-ellipsis">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="!sharedLoading && sharedTotal==0">
+        <h4>No shared application available</h4>
+      </div>
+      <div class="tile-wrap" *ngIf="!sharedLoading && sharedTotal>0">
+        <div class="tile" *ngFor="let item of sharedList | filter:searchText; let $index=index"
+          style="text-overflow: ellipsis;height:100px">
+          <div class="notch" [ngStyle]="{'background-color':item.theme}"></div>
+          <div class="tile-image"
+            [ngStyle]="item.logo && {'background-image':'url('+baseApi+'/app/logo/'+item.logo+')'}"></div>
+          <div class="tile-mid">
+            <div class="tile-content">
+              <h6 class="list-group-item-heading">{{item.title}}
+              </h6>
+              <p class="desc">{{item.description}}</p>
+            </div>
+
+            <div class="tile-action">
+              <button class="btn btn-primary btn-round stack" [class.disabled]="offline"
+                routerLink="/design/{{item.id}}">
+                <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                Edit App
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="sharedTotal>pageSizeShared" class="d-flex justify-content-center p-3 rounded">
+        <ngb-pagination [collectionSize]="sharedTotal" [pageSize]="pageSizeShared" [(page)]="pageNumberShared"
+          [maxSize]="4" [rotate]="true" (pageChange)="getSharedList(pageNumberShared)" [boundaryLinks]="true"
+          [directionLinks]="false">
+        </ngb-pagination>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<ng-template #editItemTpl let-c="close" let-d="dismiss">
+  <div ngForm #editItemForm="ngForm">
+
+    <div class="modal-header border-0">
+      <h4 class="modal-title">App Properties</h4>
+    </div>
+    <div class="modal-body" [class.disabled]="offline">
+
+      <div class="m-a" style="max-width:10em;">
+        <div class="img-thumbnail mb-2">
+          <input type="file" style="display: none" (change)="uploadLogo($event)" id="logo" [(ngModel)]="file"
+            name="logo" accept="image/**" />
+          <label class="mb-0 d-block" for="logo">
+            <img *ngIf="!editItemData.logo" style="background: #aaa" src="assets/img/blank_product.png" width="100%">
+            <img *ngIf="editItemData.logo" src="{{baseApi}}/app/logo/{{editItemData.logo}}" alt="Image preview..."
+              onError="this.src='assets/img/blank_product.png'" style="max-width:100%">
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-form-label">App Title *</label>
+        <input type="text" class="form-control" [(ngModel)]="editItemData.title"
+          (ngModelChange)="editItemData.id||editItemData.appPath=toHyphen(editItemData.title)" name="title"
+          placeholder="ie: My First App" required>
+      </div>
+      <div class="form-group">
+        <label class="col-form-label">Description</label>
+
+        <textarea class="form-control" [(ngModel)]="editItemData.description" name="description"
+          placeholder="Description of the app"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="col-form-label">Choose Layout *</label>
+        <div class="row">
+          <div class="col-6">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="sidemenu" name="layout"
+                [(ngModel)]="editItemData.layout" value="sidemenu" required>
+              <label for="sidemenu" class="custom-control-label">Side Menu
+                <div class="ml-0 my-1">
+                  <img src="assets/img/side-menu.svg" [class.selected]="editItemData.layout=='sidemenu'" width="80%">
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="topnav" name="layout"
+                [(ngModel)]="editItemData.layout" value="topnav" required>
+              <label for="topnav" class="custom-control-label">Top Nav
+                <div class="ml-0 my-1">
+                  <img src="assets/img/top-nav.svg" [class.selected]="editItemData.layout=='topnav'" width="80%">
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="form-group">
+        <label class="col-form-label">Choose App Status * (can be change later)</label>
+        <div class="row">
+          <div class="col mb-2">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="status-local" name="status"
+                [(ngModel)]="editItemData.status" value="local" required>
+              <label for="status-local" class="custom-control-label">Local
+                <div class="small">App is only accessible via URL</div>
+              </label>
+            </div>
+          </div>
+          <div class="col mb-2">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="status-published" name="status"
+                [(ngModel)]="editItemData.status" value="published" required>
+              <label for="status-published" class="custom-control-label">Published
+                <div class="small">App available in Marketplace</div>
+              </label>
+            </div>
+          </div>
+          <div class="col mb-2">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="status-template" name="status"
+                [(ngModel)]="editItemData.status" value="template" required>
+              <label for="status-template" class="custom-control-label">Template
+                <div class="small">App only available as template</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- <div class="form-group" *ngIf="editItemData.status=='published'">
+        <label class="col-form-label">Price (leave blank if it's free)</label>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text">MYR</span>
+            </div>
+        <input type="number" class="form-control" [(ngModel)]="editItemData.price" name="price"
+          placeholder="ie: 8">
+        </div>
+      </div> -->
+      <div class="form-group" *ngIf="editItemData.status=='published'">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="secret" [(ngModel)]="editItemData.secret"
+            name="secret">
+          <label class="custom-control-label" for="secret">Protected? (Require activation to copy)</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>App Theme</label>
+        <div>
+          <div class="btn-group btn-group-toggle" ngbRadioGroup name="theme" [(ngModel)]="editItemData.theme">
+            <label ngbButtonLabel class="btn text-white" [ngStyle]="{'background-color':c?.color}"
+              *ngFor="let c of themes; let $index=index">
+              <input ngbButton type="radio" [value]="c?.color"> {{$index+1}} </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="shared" [(ngModel)]="editItemData.shared"
+            name="shared">
+          <label class="custom-control-label" for="shared">Share design? (Appear in others' App Designer)</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label">App Path</label>
+        <div class="input-group">
+          <input type="text" class="form-control" [(ngModel)]="editItemData.appPath"
+            [ngModelOptions]="{updateOn: 'blur'}" #appPath="ngModel" name="appPath" [uniqueAppPath]="initialAppPath">
+          <div class="input-group-append">
+            <span class="input-group-text">.{{getHost()}}</span>
+          </div>
+        </div>
+        <small *ngIf="appPath.pending">Checking availability...</small>
+        <small *ngIf="appPath.invalid" class="text-danger">
+          <span *ngIf="appPath.errors?.uniqueAppPath">
+            App Path <strong>{{editItemData.appPath}}</strong> is already taken.
+          </span>
+        </small>
+        <small *ngIf="appPath.valid && editItemData.appPath && initialAppPath!=editItemData.appPath"
+          class="text-success">
+          App Path <strong>{{editItemData.appPath}}</strong> is available.
+        </small>
+      </div>
+      <div class="form-group" *ngIf="editItemData?.id">
+        <label class="control-label">Creator (email, comma separated)</label>
+        <input type="text" class="form-control" [(ngModel)]="editItemData.email" name="email">
+
+      </div>
+
+      <div class="form-group">
+        <label class="control-label">Sign in with</label>
+        <div class="row">
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useUnimas" [(ngModel)]="editItemData.useUnimas"
+                [disabled]="user.email.indexOf('@unimas.my')==-1" name="useUnimas">
+              <label class="custom-control-label text-center" for="useUnimas">
+                <fa-icon [icon]="['fas','university']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">UNIMAS Identity</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useGoogle" [(ngModel)]="editItemData.useGoogle"
+                name="useGoogle">
+              <label class="custom-control-label text-center" for="useGoogle">
+                <fa-icon [icon]="['fab','google']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Google Account</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useFacebook"
+                [(ngModel)]="editItemData.useFacebook" name="useFacebook">
+              <label class="custom-control-label text-center" for="useFacebook">
+                <fa-icon [icon]="['fab','facebook-f']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Facebook Account</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useGithub" [(ngModel)]="editItemData.useGithub"
+                name="useGithub">
+              <label class="custom-control-label text-center" for="useGithub">
+                <fa-icon [icon]="['fab','github']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Github Account</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useLinkedin"
+                [(ngModel)]="editItemData.useLinkedin" name="useLinkedin">
+              <label class="custom-control-label text-center" for="useLinkedin">
+                <fa-icon [icon]="['fab','linkedin']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">LinkedIn Account</div>
+              </label>
+            </div>
+          </div>
+
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useEmail" [(ngModel)]="editItemData.useEmail"
+                name="useEmail">
+              <label class="custom-control-label text-center" for="useEmail">
+                <fa-icon [icon]="['far','envelope']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Use Email (Signup)</div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer border-0 justify-content-between">
+      <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+      <button type="button" class="btn btn-round btn-primary" [class.disabled]="offline"
+        [disabled]="editItemForm.invalid" (click)="c(editItemData)">
+        <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+        Save App
+      </button>
+    </div>
+  </div>
+</ng-template>
+<!-- </script> -->
+
+<!-- <script type="text/ng-template" id="itemRemove.html"> -->
+<ng-template #removeItemTpl let-c="close" let-d="dismiss">
+  <div>
+
+    <div class="modal-header border-0">
+      <h5 class="modal-title">Remove App</h5>
+    </div>
+    <div class="modal-body">
+      <p>
+        Are you sure you want to remove this app?
+      </p>
+
+      <div class="form">
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">App Title</label>
+
+          <div class="col-md-6">
+            <input type="text" readonly class="form-control-plaintext" value="{{removeItemData.title}}">
+            <!-- <p class="form-control-static">{{removeItemData.title}}</p> -->
+          </div>
+        </div>
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">Description</label>
+
+          <div class="col-md-6">
+            <input type="text" readonly class="form-control-plaintext" value="{{removeItemData.description}}">
+            <!-- <p class="form-control-static">{{removeItemData.description}}</p> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer border-0 justify-content-between">
+      <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+      <button type="button" class="btn btn-round btn-primary" (click)="c(removeItemData)">
+        <i class="icon-minus-sign-alt"></i> Remove App
+      </button>
+    </div>
+  </div>
+</ng-template>

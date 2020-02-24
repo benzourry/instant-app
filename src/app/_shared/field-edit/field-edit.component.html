@@ -1,0 +1,296 @@
+<div class="form-group" [ngClass]="field.altClass">
+  <ng-container *ngTemplateOutlet="{'text':text,'textarea':textarea,'number':number,'date':date,'checkbox':checkbox,'select':select,'radio':radio,'scaleTo10':scaleTo10Tpl,'scaleTo5':scaleTo5Tpl,
+'imagePreview':imagePreview,'file':file,'eval':eval,'static':static,'qr':qr}[field.type]">
+  </ng-container>
+</div>
+
+<ng-template #text>
+  <label class="has-float-label" [class.always]="always" for="f-{{field.id}}">
+    <input class="form-control" type="text" id="f-{{field.id}}" name="f-{{field.id}}" #formField="ngModel"
+      [(ngModel)]="value" [maxlength]="field?.v?.maxlength" [minlength]="field?.v?.minlength"
+      [placeholder]="field.placeholder||'&nbsp;'" [pattern]="field?.v?.pattern" [required]="field?.v?.required"
+      (ngModelChange)="valueChanged($event)" [readonly]="field.readOnly" />
+
+    <span class="label-span" *ngIf="!field.hideLabel">{{field.label}} <span *ngIf="field?.v?.required">*</span>
+      <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+    </span>
+  </label>
+
+  <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+    <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+    <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+    <span *ngIf="formField.errors.minlength">{{field.label}} must have at least {{field?.v?.minlength}}
+      characters</span>
+    <span *ngIf="formField.errors.maxlength">{{field.label}} must have at most {{field?.v?.maxlength}} characters</span>
+    <span *ngIf="formField.errors.pattern">Not a valid {{field.label}}</span>
+  </small>
+
+</ng-template>
+
+<ng-template #textarea>
+  <label class="has-float-label" [class.always]="always" for="f-{{field.id}}">
+    <textarea class="form-control" id="f-{{field.id}}" name="f-{{field.id}}" rows="3" #formField="ngModel"
+      [(ngModel)]="value" [maxlength]="field?.v?.maxlength" [minlength]="field?.v?.minlength"
+      [placeholder]="field.placeholder||'&nbsp;'" [pattern]="field?.v?.pattern" [required]="field?.v?.required"
+      (ngModelChange)="valueChanged($event)" [readonly]="field.readOnly"></textarea>
+    <span class="label-span" *ngIf="!field.hideLabel">{{field.label}} <span *ngIf="field?.v?.required">*</span>
+      <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+    </span>
+
+    <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+      <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+      <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+      <span *ngIf="formField.errors.minlength">{{field.label}} must have at least {{field?.v?.minlength}}
+        characters</span>
+      <span *ngIf="formField.errors.maxlength">{{field.label}} must have at most {{field?.v?.maxlength}}
+        characters</span>
+      <span *ngIf="formField.errors.pattern">Not a valid {{field.label}}</span>
+    </small>
+  </label>
+</ng-template>
+
+<ng-template #number>
+  <label class="has-float-label" [class.always]="always" for="f-{{field.id}}">
+    <input class="form-control" type="number" id="f-{{field.id}}" name="f-{{field.id}}" #formField="ngModel"
+      [(ngModel)]="value" [placeholder]="field.placeholder||'&nbsp;'" [min]="field?.v?.min" [max]="field?.v?.max"
+      [required]="field?.v?.required" (ngModelChange)="valueChanged($event)" [readonly]="field.readOnly" />
+    <span class="label-span" *ngIf="!field.hideLabel">{{field.label}} <span *ngIf="field?.v?.required">*</span>
+      <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+    </span>
+    <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+      <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+      <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+      <span *ngIf="formField.errors.max">{{field.label}} should be under {{field?.v?.max}}</span>
+      <span *ngIf="formField.errors.min">{{field.label}} should be above {{field?.v?.min}}</span>
+    </small>
+  </label>
+</ng-template>
+
+<ng-template #date>
+  <div class="input-group">
+    <label class="has-float-label" [class.always]="always" for="f-{{field.id}}">
+      <input class="form-control" type="text" id="f-{{field.id}}v" name="f-{{field.id}}" #formField="ngModel"
+        [(ngModel)]="value" [placeholder]="field.placeholder||'&nbsp;'" [required]="field?.v?.required"
+        (focus)="d.toggle()" (ngModelChange)="valueChanged($event)" ngbDatepicker #d="ngbDatepicker"
+        [readonly]="field.readOnly">
+      <span class="label-span" *ngIf="!field.hideLabel">{{field.label}} <span *ngIf="field?.v?.required">*</span>
+        <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+      </span>
+    </label>
+
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
+        <fa-icon [icon]="['fas','calendar']"></fa-icon>
+      </button>
+    </div>
+
+  </div>
+
+  <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+    <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+    <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+  </small>
+
+</ng-template>
+
+<ng-template #checkbox>
+
+  <div>
+    <label class="label-span" for="f-{{field.id}}" *ngIf="!field.hideLabel">{{field.label}} <span
+        *ngIf="field?.v?.required">*</span>
+      <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+    </label>
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" [(ngModel)]="value" #formField="ngModel" id="f-{{field.id}}"
+        name="f-{{field.id}}" [required]="field?.v?.required" (ngModelChange)="valueChanged($event)">
+      <label class="custom-control-label" for="f-{{field.id}}">{{field.placeholder}}</label>
+    </div>
+  </div>
+
+  <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+    <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+  </small>
+</ng-template>
+
+<ng-template #select>
+  <label class="has-float-label" [class.always]="always">
+    <ng-select [items]="lookupList" #formField="ngModel" id="f-{{field.id}}" bindLabel="name" [(ngModel)]="value"
+    (focus)="selectFocused($event)"
+      name="f-{{field.id}}" [required]="field?.v?.required" (ngModelChange)="valueChanged($event)"
+      [placeholder]="(field.label||'&nbsp;') + (field?.v?.required?' *':' ')">
+    </ng-select>
+    <!-- [placeholder]="field.placeholder||'&nbsp;'" -->
+    <!-- <span class="label-span">{{field.label}}</span> -->
+  </label>
+
+
+  <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+    <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+    <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+  </small>
+</ng-template>
+
+<ng-template #radio>
+  <label class="label-span" for="f-{{field.id}}" *ngIf="!field.hideLabel">{{field.label}} <span
+      *ngIf="field?.v?.required">*</span>
+    <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+  </label>
+  <div *ngFor="let c of lookupList; let isLast=last">
+    <div class="custom-control custom-radio">
+      <input type="radio" class="custom-control-input" #fieldValue [value]="c" id="f-{{field.id}}-{{c?.code}}"
+        [checked]="value?.code === c?.code" name="f-{{field.id}}" [required]="field?.v?.required"
+        (change)=" value = c;valueChanged($event);" />
+      <label class="custom-control-label" for="f-{{field.id}}-{{c?.code}}">{{c?.name}}</label>
+    </div>
+
+    <small class="val-text form-text text-danger" *ngIf="isLast && formField?.invalid">
+      <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+      <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+    </small>
+  </div>
+</ng-template>
+
+<ng-template #scaleTo10Tpl>
+  <label class="label-span" for="f-{{field.id}}" *ngIf="!field.hideLabel">{{field.label}} <span
+      *ngIf="field?.v?.required">*</span>
+    <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+  </label>
+  <div>
+
+    <div class="btn-group btn-group-toggle" ngbRadioGroup name="f-{{field.id}}" #formField="ngModel" [(ngModel)]="value"
+      [required]="field?.v?.required" (ngModelChange)="valueChanged($event)">
+      <label ngbButtonLabel class="btn btn-outline-secondary btn-sm light"
+        *ngFor="let i of scaleTo10; let $index=index">
+        <input ngbButton type="radio" [value]="i"> {{i}}</label>
+    </div>
+  </div>
+
+  <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+    <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+    <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+  </small>
+</ng-template>
+
+<ng-template #scaleTo5Tpl>
+  <label class="label-span" for="f-{{field.id}}" *ngIf="!field.hideLabel">{{field.label}} <span
+      *ngIf="field?.v?.required">*</span>
+    <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+  </label>
+  <div>
+
+    <div class="btn-group btn-group-toggle" ngbRadioGroup name="f-{{field.id}}" #formField="ngModel" [(ngModel)]="value"
+      [required]="field?.v?.required" (ngModelChange)="valueChanged($event)">
+      <label ngbButtonLabel class="btn btn-outline-secondary btn-sm light" *ngFor="let i of scaleTo5; let $index=index">
+        <input ngbButton type="radio" [value]="i"> {{i}}</label>
+    </div>
+  </div>
+
+  <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+    <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+    <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+  </small>
+</ng-template>
+
+<ng-template #imagePreview>
+  <img [src]="value || 'assets/img/blank_product.png'" width="100%">
+</ng-template>
+
+<ng-template #file>
+  <div class="custom-file" *ngIf="field.subType=='other'">
+    <label class="has-float-label" for="f-{{field.id}}">
+      <input type="file" [hidden]="true" #formField="ngModel" (change)="fileValueChanged($event)" id="f-{{field.id}}"
+        [(ngModel)]="file[field.code]" name="f-{{field.id}}" [required]="!value && field?.v?.required" />
+      <div class="form-control" style="background: white" *ngIf="!value">
+        <fa-icon [icon]="['fas','upload']"></fa-icon>
+        {{field.placeholder||'Browse'}}
+      </div>
+      <div class="form-control" style="background: white" *ngIf="value">{{value}}</div>
+      <span class="label-span" *ngIf="!field.hideLabel">{{field.label}} <span *ngIf="field?.v?.required">*</span>
+        <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+      </span>
+    </label>
+    <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+      <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+      <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+      <span *ngIf="formField.errors.maxSize">File size should not exceed 25MB</span>
+    </small>
+  </div>
+
+  <div *ngIf="field.subType=='image'">
+    <label class="label-span" for="f-{{field.id}}" *ngIf="!field.hideLabel">{{field.label}} <span
+        *ngIf="field?.v?.required">*</span>
+      <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+    </label>
+    <input type="file" style="display: none" #formField="ngModel" (change)="fileValueChanged($event)"
+      id="f-{{field.id}}" [(ngModel)]="file[field.code]" name="f-{{field.id}}"
+      [required]="!value  && field?.v?.required" accept="image/**" />
+    <label class="mb-0 d-block" for="f-{{field.id}}">
+      <img *ngIf="!value" style="background: #aaa" src="assets/img/blank_product.png" width="100%">
+      <img *ngIf="value" src="{{baseApi}}/entry/file/inline/{{value}}" alt="Image preview..." style="max-width:100%">
+    </label>
+    <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+      <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+      <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+      <span *ngIf="formField.errors.maxSize">File size should not exceed 25MB</span>
+    </small>
+  </div>
+</ng-template>
+
+<ng-template #eval>
+  <div *ngIf="field.subType=='text'">
+    <div class="input-group">
+
+      <div class="input-group-prepend" *ngIf="field.placeholder">
+        <span class="input-group-text">{{field.placeholder}}</span>
+      </div>
+      <label class="has-float-label" [class.always]="always" for="f-{{field.id}}">
+        <input class="form-control" style="background: white" type="text" placeholder="Not Available"
+          [value]="value||''" readonly>
+        <span class="label-span" *ngIf="!field.hideLabel">{{field.label}}
+          <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+        </span>
+      </label>
+    </div>
+  </div>
+  <div *ngIf="field.subType=='qr'">
+    <label class="label-span" for="f-{{field.id}}" *ngIf="!field.hideLabel">{{field.label}} <span
+        *ngIf="field?.v?.required">*</span>
+      <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+    </label>
+    <img [src]="value?baseApi+'/form/qr?code='+value:'assets/img/blank-qr.svg'" width="100%">
+  </div>
+</ng-template>
+<ng-template #static>
+  <ng-container *ngIf="field.subType=='html'">
+    <label class="label-span" for="f-{{field.id}}" *ngIf="!field.hideLabel">{{field.label}} <span
+        *ngIf="field?.v?.required">*</span>
+      <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+    </label>
+    <div class="mb-1" [innerHtml]="field.placeholder"></div>
+  </ng-container>
+  <ng-container *ngIf="field.subType=='clearfix'">
+    <div class="clfx clearfix"></div>
+  </ng-container>
+</ng-template>
+<ng-template #qr>
+  <div class="custom-file">
+    <label class="has-float-label" for="f-{{field.id}}">
+      <input type="file" [hidden]="true" #formField="ngModel" (change)="qrValueChanged($event)" id="f-{{field.id}}"
+        [(ngModel)]="file[field.code]" name="f-{{field.id}}" [required]="!value && field?.v?.required" accept="image/*"
+        capture />
+      <div class="form-control" style="background: white" *ngIf="!value">
+        <fa-icon [icon]="['fas','qrcode']"></fa-icon>
+        {{field.placeholder||'Scan or Upload QR Code'}}
+      </div>
+      <div class="form-control" style="background: white" *ngIf="value">{{value}}</div>
+      <span class="label-span" *ngIf="!field.hideLabel">{{field.label}} <span *ngIf="field?.v?.required">*</span>
+        <fa-icon class="ml-1" [icon]="['fas','info-circle']" *ngIf="field.hint" ngbTooltip="{{field.hint}}"></fa-icon>
+      </span>
+    </label>
+    <small class="val-text form-text text-danger" *ngIf="formField?.touched && formField?.invalid">
+      <fa-icon [icon]="['fas','exclamation-triangle']"></fa-icon>
+      <span *ngIf="formField.errors.required">{{field.label}} is required</span>
+      <span *ngIf="formField.errors.maxSize">QR Code image file should not exceed 25MB</span>
+    </small>
+  </div>
+</ng-template>

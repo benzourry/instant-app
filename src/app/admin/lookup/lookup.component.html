@@ -1,0 +1,413 @@
+<style>
+    input[type=search].start {
+        background: rgba(255, 255, 255, .7) url(assets/img/search-icon.png) no-repeat 9px center;
+        border: none;
+        /* solid 2px #333; */
+        padding: 6px 10px 6px 32px;
+        vertical-align: middle;
+        /*-webkit-border-radius: 10em;*/
+        /*-moz-border-radius: 10em;*/
+        border-radius: 10em;
+        color: black;
+        max-width: 100%;
+    }
+
+    input[type=search].start:focus {
+        /*background-color: #fff;*/
+        border-color: #0078d7;
+        outline: none;
+        -webkit-box-shadow: 0 0 5px rgba(109, 207, 246, .5);
+        -moz-box-shadow: 0 0 5px rgba(109, 207, 246, .5);
+        box-shadow: 0 0 5px rgba(109, 207, 246, .5);
+    }
+</style>
+
+
+<div class="wrapper">
+    <div class="sidebar">
+        <div class="p-3">
+            <h4 class="mb-3">Lookup Manager</h4>
+            <input type="search" class="start" placeholder="Filter list" (keypress.enter)="loadLookupList(1)"
+                [(ngModel)]="searchText">
+        </div>
+        <div class="group-list">
+            <div class="p-3 text-centered" *ngIf="itemLoading">
+                <div class="lds-ellipsis white">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <div class="mb-3" *ngIf="!itemLoading">
+                <a class="pointer" (click)="loadLookup(a?.id)" [routerLink]="['/admin/lookup']" [queryParams]="{id:a?.id}"
+                    [class.active]="a.id==lookupId" *ngFor="let a of lookupList | filter:searchText">
+                    <div class="list-group-item-heading">
+                        {{a.name}}
+                    </div>
+                    <div class="list-group-item-text" *ngIf="a.description">{{a.description}}</div>
+                </a>
+                <a class="pointer" (click)="editLookup(editLookupTpl,{}, true)"  [class.disabled]="offline">
+                    <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+
+                    Create Lookup
+                </a>
+
+                <div class="p-2">
+                    <ngb-pagination *ngIf="lookupTotal>itemsPerPage" [collectionSize]="lookupTotal" [pageSize]="itemsPerPage"
+                        [(page)]="pageNumber" [maxSize]="5" (pageChange)="loadLookupList(pageNumber)" [boundaryLinks]="false"
+                        [directionLinks]="false"></ngb-pagination>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="content">
+        <div class="limit-width fix-gutter">
+            <div class="single-pane">
+                <div *ngIf="lookup">
+                    <div class="text-center">
+                        <h3>{{lookup.name}}</h3>
+                        <p class="mb-1">{{lookup.description}}</p>
+                        <p *ngIf="lookup.shared" class="mb-2">
+                            <fa-icon [icon]="['fas','globe']" [fixedWidth]="true"></fa-icon>
+                            Public Lookup
+                        </p>
+                        <p *ngIf="!lookup.shared" class="text-danger mb-2">
+                            <fa-icon [icon]="['fas','lock']" [fixedWidth]="true"></fa-icon>
+                            Private Lookup
+                        </p>
+                        <div *ngIf="lookup.sourceType=='rest'" class="text-muted mb-3">
+                            <small>{{lookup.responseType}} from {{lookup.endpoint}}</small>
+                        </div>
+
+                        <div *ngIf="lookup">
+                            <button class="btn btn-round btn-secondary" (click)="editLookup(editLookupTpl,lookup)" [class.disabled]="offline">
+                                <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                            </button>
+                            <button class="btn btn-round btn-secondary mr-1 ml-1" [class.disabled]="offline" (click)="removeLookup(removeLookupTpl,lookup)">
+                                <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                            </button>
+                            <button class="btn btn-round btn-info" *ngIf="lookup.sourceType=='db'" [class.disabled]="offline" (click)="editLookupEntry(editLookupEntryTpl,{},true)">
+                                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                Add Data
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="p-4 text-centered" *ngIf="loading">
+                        <div class="lds-ellipsis">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4" *ngIf="!loading">
+                        <table class="table table-bordered table-striped" *ngIf="lookupEntryList?.length">
+                            <thead>
+                                <tr>
+                                    <th class="w-10">CODE</th>
+                                    <th class="w-90">DESCRIPTION</th>
+                                    <th class="w-10">EXTRA</th>
+                                    <th class="w-10">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let entry of lookupEntryList">
+                                    <td>{{entry.code}}</td>
+                                    <td>{{entry.name}}</td>
+                                    <td>{{entry.extra}}</td>
+                                    <td>
+                                        <div *ngIf="lookup.sourceType=='db'">
+                                            <button class="btn btn-secondary mr-1 btn-sm btn-round" [class.disabled]="offline" (click)="removeLookupEntry(removeLookupEntryTpl,entry)">
+                                                <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm btn-round" [class.disabled]="offline" (click)="editLookupEntry(editLookupEntryTpl,entry)">
+                                                <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                                            </button>
+                                        </div>
+                                        <fa-icon [icon]="['fas','lock']" *ngIf="lookup.sourceType=='rest'" [fixedWidth]="true"></fa-icon>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="text-align: center" *ngIf="lookupEntryList?.length > 0">
+
+                        <ngb-pagination *ngIf="lookupEntryTotal>pageSize" [collectionSize]="lookupEntryTotal"
+                            [pageSize]="pageSize" [(page)]="pageNumber" size="sm" [maxSize]="10" (pageChange)="getLookupEntryList(pageNumber)"
+                            boundaryLinks="false" directionLinks="false"></ngb-pagination>
+
+                    </div>
+                    <div class="details" *ngIf="lookupEntryList == 0 && !loading">
+                        <h3>No data for {{lookup.name}}</h3>
+
+                        <p> There is no data assigned to this lookup table.
+                            <br /> You can assign a new data by clicking on the Add button. </p>
+                    </div>
+                </div>
+                <div *ngIf="!lookup" style="color:#aaa;">
+                    <h3>Please select Lookup Table from the list on the left to view it's data.</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #removeLookupEntryTpl let-c="close" let-d="dismiss">
+    <div>
+
+        <div class="modal-header">
+            <h4 class="modal-title">Remove Lookup Entry</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Code</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeLookupEntryData.code}}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Description</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeLookupEntryData.name}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" (click)="c(removeLookupEntryData)">
+                <i class="icon-minus-sign-alt"></i> Remove Lookup
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #removeLookupTpl let-c="close" let-d="dismiss">
+    <div>
+        <div class="modal-header">
+            <h4 class="modal-title">Remove Lookup</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Lookup Name</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeLookupData.name}}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Description</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeLookupData.name}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" (click)="c(removeLookupData)">
+                <i class="icon-minus-sign-alt"></i> Remove Lookup
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editLookupTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Add Lookup</h4>
+    </div>
+    <div class="modal-body fix-gutter" #lookupEditForm="ngForm" ngForm>
+        <div class="form-group">
+            <label>Lookup Name</label>
+            <input type="text" class="form-control" [(ngModel)]="editLookupData && editLookupData.name" #name="ngModel"
+                name="name" required>
+            <small class="form-text has-warning" *ngIf="name?.invalid">
+                <span class="help-block" *ngIf="name?.errors?.required">Name is required</span>
+            </small>
+        </div>
+        <div class="form-group">
+            <label>Lookup Description</label>
+            <textarea class="form-control" [(ngModel)]="editLookupData && editLookupData.description" #description="ngModel"
+                name="description"></textarea>
+        </div>
+        <div class="form-group form-check">
+            <input class="form-check-input" type="checkbox" [(ngModel)]="editLookupData && editLookupData.shared" id="shared"
+                name="shared">
+            <label class="form-check-label" for="shared">Shared (Can be used by others)</label>
+        </div>
+        <div class="form-group">
+            <label>Source Type</label>
+            <div>
+                <div class="btn-group btn-group-toggle" ngbRadioGroup name="sourceType" #sourceType="ngModel"
+                    [(ngModel)]="editLookupData && editLookupData.sourceType" required>
+                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                        <input ngbButton type="radio" value="db"> Database (key-in)</label>
+                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                        <input ngbButton type="radio" value="rest"> RESTFul Endpoint</label>
+                </div>
+            </div>
+            <small class="form-text has-warning" *ngIf="sourceType?.invalid">
+                <span class="help-block" *ngIf="sourceType?.errors?.required">Source type is required</span>
+            </small>
+        </div>
+        <ng-container *ngIf="editLookupData?.sourceType == 'rest'">
+            <div class="form-group">
+                <label>RESTful Endpoint</label>
+                <input type="text" class="form-control" [(ngModel)]="editLookupData && editLookupData.endpoint"
+                    #endpoint="ngModel" name="endpoint" required>
+                <small class="form-text has-warning" *ngIf="endpoint?.invalid">
+                    <span class="help-block" *ngIf="endpoint?.errors?.required">Endpoint URL is required</span>
+                </small>
+            </div>
+            <div class="form-group">
+                <label>Response Type</label>
+                <div>
+                    <div class="btn-group btn-group-toggle" ngbRadioGroup name="type" #responseType="ngModel"
+                        [(ngModel)]="editLookupData && editLookupData.responseType" required>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="json"> JSON </label>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="jsonp"> JSONP </label>
+                    </div>
+                </div>
+                <small class="form-text has-warning" *ngIf="responseType?.invalid">
+                    <span class="help-block" *ngIf="responseType?.errors?.required">Response type is required</span>
+                </small>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Root</label>
+                        <input type="text" class="form-control" placeholder="ie: /content" [(ngModel)]="editLookupData && editLookupData.jsonRoot"
+                            #jsonRoot="ngModel" name="jsonRoot">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Extra (optional)</label>
+                        <input type="text" class="form-control" placeholder="ie: /alt" [(ngModel)]="editLookupData && editLookupData.extraProp"
+                            #extra="ngModel" name="extraProp">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" class="form-control" placeholder="ie: /code" [(ngModel)]="editLookupData && editLookupData.codeProp"
+                            #codeProp="ngModel" name="codeProp" required>
+                        <small class="form-text has-warning" *ngIf="codeProp?.invalid">
+                            <span class="help-block" *ngIf="codeProp?.errors?.required">Property for code is required</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Desc</label>
+                        <input type="text" class="form-control" placeholder="ie: /description" [(ngModel)]="editLookupData && editLookupData.descProp"
+                            #descProp="ngModel" name="descProp" required>
+                        <small class="form-text has-warning" *ngIf="descProp?.invalid">
+                            <span class="help-block" *ngIf="descProp?.errors?.required">Property for desc is required</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Http Headers</label>
+                <input type="text" class="form-control" [(ngModel)]="editLookupData && editLookupData.headers" #headers="ngModel"
+                    name="headers">
+                <small class="form-text">
+                    <span class="help-block">
+                        <fa-icon [icon]="['fas','info-circle']" [fixedWidth]="true"></fa-icon>
+                        Format: name1->value1|name2->value2
+                    </span>
+                </small>
+            </div>
+        </ng-container>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" [disabled]="lookupEditForm.invalid" (click)="c(editLookupData)">
+            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+            Save Lookup
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #editLookupEntryTpl let-c="close" let-d="dismiss">
+    <div #editLookupEntryForm="ngForm" ngForm>
+
+        <div class="modal-header">
+            <h4 class="modal-title">Add Lookup Entry</h4>
+        </div>
+        <div class="modal-body">
+            <div class="form">
+                <div class="form-group">
+                    <label class="control-label">Code *</label>
+                    <input type="text" class="form-control" name="code" #code="ngModel" [(ngModel)]="editLookupEntryData && editLookupEntryData.code"
+                        required />
+                    <small class="form-text has-warning" *ngIf="code?.invalid">
+                        <span class="help-block" *ngIf="code.errors?.required">Code is required</span>
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Description *</label>
+                    <input type="text" class="form-control" name="name" #name="ngModel" [(ngModel)]="editLookupEntryData && editLookupEntryData.name"
+                        required />
+                    <small class="form-text has-warning" *ngIf="name?.invalid">
+                        <span class="help-block" *ngIf="name.errors?.required">Description is required</span>
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Extra</label>
+                    <input type="text" class="form-control" name="extra" #extra="ngModel" [(ngModel)]="editLookupEntryData && editLookupEntryData.extra" />
+                    <small class="form-text has-warning" *ngIf="extra?.invalid">
+                        <span class="help-block" *ngIf="extra.errors?.required">Description is required</span>
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Status *</label>
+
+                    <div>
+                        <div class="btn-group btn-group-toggle" name="enabled" #enabled="ngModel" ngbRadioGroup
+                            [(ngModel)]="editLookupEntryData && editLookupEntryData.enabled">
+                            <label ngbButtonLabel class="btn btn-sm btn-success">
+                                <input type="radio" ngbButton [value]="1" [required]="!editLookupEntryData?.enabled">
+                                Enabled</label>
+                            <label ngbButtonLabel class="btn btn-sm btn-danger">
+                                <input type="radio" ngbButton [value]="0" [required]="!editLookupEntryData?.enabled">
+                                Disabled</label>
+                            <label ngbButtonLabel class="btn btn-sm btn-warning">
+                                <input type="radio" ngbButton [value]="2" [required]="!editLookupEntryData?.enabled">
+                                Hidden Enabled</label>
+                        </div>
+                        <small class="form-text has-warning" *ngIf="enabled?.invalid">
+                            <span class="help-block" *ngIf="enabled.errors?.required">Status is required</span>
+                        </small>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editLookupEntryForm.invalid" (click)="c(editLookupEntryData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Lookup
+            </button>
+        </div>
+    </div>
+</ng-template>

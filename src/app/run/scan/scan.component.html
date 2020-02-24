@@ -1,0 +1,25 @@
+<div id="app">
+  <div class="cont position-fixed">
+    <video #video id="video" class="no-ev" autoplay playsinline></video>
+    <div [ngClass]="altClass" *ngIf="camSupport">
+      <div style="color: #f00" *ngIf="error">
+        Invalid QR Code ({{errorMsg}})
+      </div>
+      <div class="d-flex justify-content-center align-items-center scanner-box">
+        <div class="custom-scanner"></div>
+        <div>
+          Align QR Code here
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cont bg-white p-3" *ngIf="!camSupport">
+    <label for="qr-input-screen" style="display: block;margin-bottom: unset">
+      <input type="file" [hidden]="true" id="qr-input-screen" (change)="qrValueChanged($event)" [(ngModel)]="file"
+        name="screen" accept="image/*" capture />
+      <fa-icon [icon]="['fas','qrcode']" [fixedWidth]="true"></fa-icon>
+      Upload QR Code
+    </label>
+  </div>
+  <canvas #canvas id="canvas" style="display:none"></canvas>
+</div>

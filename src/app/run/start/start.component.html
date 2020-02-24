@@ -1,0 +1,130 @@
+<div class="p-5 text-centered" *ngIf="appLoading">
+    <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+<div class="wrapper" *ngIf="!appLoading" [ngClass]="app?.layout||'sidemenu'">
+
+
+    <!-- <div>
+        <h1>Home</h1>
+        <p>{{bodyText}}</p>
+        <button (click)="openModal('custom-modal-1')">Open Modal 1</button>
+        <button (click)="openModal('custom-modal-2')">Open Modal 2</button>
+    </div> -->
+    <!-- <app-scan></app-scan> -->
+
+    <div class="app-nav" [ngStyle]="{'background-color':app?.theme}">
+        <div class="app-info p-3">
+            <h4 class="font-weight-light" routerLink="/run/{{app?.id}}" >{{app?.title}}</h4>
+
+            <div *ngIf="app?.description">{{app?.description}}</div>
+            <small>{{user?.email}}
+                <div><a class="text-white pointer mr-1" routerLink="/login">Logout</a>
+                    <a class="text-white pointer mr-1" *ngIf="app?.email.indexOf(user?.email)>-1"
+                        routerLink="/design/{{app?.id}}">Edit
+                        App</a>
+                </div>
+            </small>
+        </div>
+        <div class="app-menu">
+            <ng-container *ngFor="let form of formList">
+                <div class="menu">
+                    <div class="menu-heading d-flex justify-content-between align-items-center px-3"
+                        (click)="navToggle={};navToggle[form.id]=!navToggle[form.id]">
+                        {{form.title}}
+                        <fa-icon class="ml-1" [icon]="['fas',navToggle[form.id]?'caret-up':'caret-down']"
+                            [fixedWidth]="true"></fa-icon>
+                    </div>
+                    <div class="menu-items mb-1" *ngIf="navToggle[form.id]">
+                        <ng-container *ngFor="let dash of form.dashboards">
+                            <a routerLink="dashboard/{{dash.id}}"
+                                *ngIf="!dash.access||dash.access.indexOf(user.email)>-1" routerLinkActive="active">
+                                <fa-icon [icon]="['fas','tachometer-alt']" [fixedWidth]="true"></fa-icon>
+                                {{dash.title}}
+                            </a>
+                        </ng-container>
+                        <!-- <a (click)="qrScanDialog(qrScanTpl,{})">Scan</a> -->
+
+                        <ng-container *ngFor="let sc of form.screens">
+                            <a (click)="qrScanDialog(qrScanTpl,sc.actions[0])" *ngIf="sc.type=='qr'"
+                                routerLinkActive="active" href="javascript:void(0)">
+                                <fa-icon [icon]="['fas','qrcode']" [fixedWidth]="true"></fa-icon>
+                                {{sc.title}}
+                            </a>
+                        </ng-container>
+
+
+                        <!-- <ng-container *ngFor="let sc of form.screens">
+                            <label for="screen-{{sc.id}}" style="display: block;margin-bottom: unset" *ngIf="sc.type=='qr'">
+                                <input type="file" [hidden]="true" id="screen-{{sc.id}}" (change)="qrValueChanged($event, sc.actions[0])"
+                                    [(ngModel)]="file" name="screen-{{sc.id}}" accept="image/*" capture />
+                                <a routerLinkActive="active" (click)="qr">
+                                    <fa-icon [icon]="['fas','qrcode']" [fixedWidth]="true"></fa-icon>
+                                    {{sc.title}}
+                                </a>
+                            </label>
+                        </ng-container> -->
+                        <ng-container *ngIf="form?.type=='db' && !form?.prev">
+                            <a routerLink="form/{{form.id}}/add" [class.disabled]="offline || form?.inactive"
+                                *ngIf="!form?.hideForm||form?.admin.indexOf(user.email)>-1" routerLinkActive="active">
+                                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                Add {{form.title}}
+                                <!-- <span class="text-danger" *ngIf="form?.inactive">Open within: {{form?.startDate|date:'short'}} - {{form?.endDate|date:'short'}}</span> -->
+                            </a>
+                        </ng-container>
+                        <ng-container *ngFor="let ds of form.datasets">
+                            <a style="display:flex; justify-content: space-between"
+                                routerLink="form/{{form.id}}/list/{{ds.id}}"
+                                *ngIf="!ds?.adminOnly||form?.admin.indexOf(user.email)>-1" routerLinkActive="active">
+                                <span>
+                                    <fa-icon [icon]="['fas','list']" *ngIf="ds.type=='all'" [fixedWidth]="true">
+                                    </fa-icon>
+                                    <fa-icon [icon]="['fas','list-ol']" *ngIf="ds.type=='user'" [fixedWidth]="true">
+                                    </fa-icon>
+                                    <fa-icon [icon]="['fas','table']" *ngIf="ds.type=='admin'" [fixedWidth]="true">
+                                    </fa-icon>
+                                    <fa-icon [icon]="['fas','check-square']" *ngIf="ds.type=='action'"
+                                        [fixedWidth]="true"></fa-icon>
+                                    {{ds.title}}
+                                </span>
+                                <span class="badge badge-danger float-right" *ngIf="badge && badge[ds.id]">{{badge &&
+                                    badge[ds.id]}}</span>
+                            </a>
+                        </ng-container>
+                    </div>
+                </div>
+            </ng-container>
+
+            <div class="menu" *ngIf="false">
+                <div class="menu-heading d-flex justify-content-between align-items-center px-3">Administration</div>
+                <div class="menu-items  mb-4">
+                    <a routerLink="form">
+                        <fa-icon [icon]="['fas','user']" [fixedWidth]="true"></fa-icon>
+                        User Management
+                    </a>
+                    <a routerLink="form">
+                        <fa-icon [icon]="['fas','envelope']" [fixedWidth]="true"></fa-icon>
+                        Email History
+                    </a>
+                    <a routerLink="form">
+                        <i class="fa fa-clock-o"></i>
+                        <fa-icon [icon]="['fas','clock']" [fixedWidth]="true"></fa-icon>
+                        Reminder
+                    </a>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+    <div class="content" (click)="app?.layout=='sidemenu' || navToggle={}">
+        <router-outlet></router-outlet>
+    </div>
+</div>
+
+<ng-template #qrScanTpl let-c="close" let-d="dismiss">
+    <app-scan (valueChange)="qrValueChange($event,d)"></app-scan>
+</ng-template>

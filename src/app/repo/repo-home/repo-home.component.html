@@ -1,0 +1,402 @@
+<div class="wrapperzzz">
+  <div class="limit-width repo centered">
+    <div class="repo-title text-centered p-3 pt-0">
+
+      <h4>App Marketplace</h4>
+      <!-- <div>Click on the app tile to run</div> -->
+    </div>
+    <div class="repo-tool text-centered">
+      <div class="tool-container" style="max-width:480px;margin:auto">
+
+        <input type="search" class="rounded" placeholder="Filter list" [(ngModel)]="searchText"
+          (keydown.enter)="getItemList(1)">
+        <button class="btn btn-round btn-secondary ml-1" name="btnActivateSpeechSearchMovie"
+          id="btnActivateSpeechSearchMovie" (click)="activateSpeechSearchMovie()" [disabled]="!showSearchButton">
+          <fa-icon [icon]="['fas','microphone']" [fixedWidth]="true"></fa-icon>
+        </button>
+      </div>
+    </div>
+    <div class="repo-item">
+      <div class="repo-title">
+        <fa-icon [icon]="['fas','thumbs-up']" [fixedWidth]="true"></fa-icon> Top Pick
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="itemLoading">
+        <div class="lds-ellipsis">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="!topLoading && topTotal==0">
+        <h1>:(</h1>
+        <h4>No application available</h4>
+      </div>
+      <div class="tile-wrap" *ngIf="!topLoading && topTotal>0">
+
+        <div class="tile" *ngFor="let item of topList | filter:searchText" style="text-overflow: ellipsis">
+          <div class="notch" [ngStyle]="{'background-color':item.theme}"></div>
+          <div class="tile-image"
+            [ngStyle]="item.logo && {'background-image':'url('+baseApi+'/app/logo/'+item.logo+')'}"></div>
+          <div class="tile-mid">
+            <div class="tile-content">
+              <h6 class="list-group-item-heading">{{item?.title}}
+              </h6>
+
+              <p style="font-size:13px; color:#666; font-style:italic;overflow: hidden;
+                            text-overflow: ellipsis;">{{item?.email}}</p>
+
+              <p class="desc">{{item?.description}}</p>
+
+
+            </div>
+
+
+            <div class="tile-action">
+              <div>
+                <a class="btn btn-round btn-success mb-2 stack" routerLink="/run/{{item?.id}}">
+                  <fa-icon [icon]="['fas','play']" [fixedWidth]="true"></fa-icon>
+                  Run App
+                </a>
+                <button *ngIf="!item.secret" class="btn btn-light btn-round mb-2 stack"
+                  (click)="cloneItem(editItemTpl,item, true)">
+                  <fa-icon [icon]="['fas','cog']" [fixedWidth]="true"></fa-icon>
+                  Copy App
+                </button>
+                <button *ngIf="item.secret" class="btn btn-danger btn-round mb-2 stack"
+                  (click)="buyItem(buyItemTpl,item, true)">
+                  <fa-icon [icon]="['fas','shopping-bag']" [fixedWidth]="true"></fa-icon>
+                  Protected
+                </button>
+                <p class="text-white mt-2"><strong>{{item.clone?item.clone:0}}</strong> copy</p>
+              </div>
+            </div>
+          </div>
+          <!-- <div *ngIf="!item.price" class="price-tag" style="background: green;">Free</div>
+                    <div *ngIf="item.price" class="price-tag" style="background: red;">{{item.price|number:'1.2-3'}}</div> -->
+        </div>
+      </div>
+      <!-- <div *ngIf="itemTotal>pageSize"  class="d-flex justify-content-center p-3 rounded">
+                <ngb-pagination [collectionSize]="itemTotal" [pageSize]="pageSize" [(page)]="pageNumber" [maxSize]="4" [rotate]="true" (pageChange)="getItemList(pageNumber)"
+                    [boundaryLinks]="true" [directionLinks]="false"></ngb-pagination>
+            </div> -->
+    </div>
+    <div class="repo-item">
+      <div class="repo-title">
+        <fa-icon [icon]="['fas','th-large']" [fixedWidth]="true"></fa-icon> Published App
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="itemLoading">
+        <div class="lds-ellipsis">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="p-4 text-muted text-centered" *ngIf="!itemLoading && itemTotal==0">
+        <h1>:(</h1>
+        <h4>No application available</h4>
+      </div>
+      <div class="tile-wrap" *ngIf="!itemLoading && itemTotal>0">
+
+        <div class="tile" *ngFor="let item of itemList | filter:searchText" style="text-overflow: ellipsis">
+          <div class="notch" [ngStyle]="{'background-color':item.theme}"></div>
+          <div class="tile-image"
+            [ngStyle]="item.logo && {'background-image':'url('+baseApi+'/app/logo/'+item.logo+')'}"></div>
+          <div class="tile-mid">
+            <div class="tile-content">
+              <h6 class="list-group-item-heading">{{item?.title}}
+              </h6>
+
+              <p style="font-size:13px; color:#666; font-style:italic;overflow: hidden;
+                            text-overflow: ellipsis;">{{item?.email}}</p>
+
+              <p class="desc">{{item?.description}}</p>
+
+
+            </div>
+
+
+            <div class="tile-action">
+              <div>
+                <a class="btn btn-round btn-success mb-2 stack" routerLink="/run/{{item?.id}}">
+                  <fa-icon [icon]="['fas','play']" [fixedWidth]="true"></fa-icon>
+                  Run App
+                </a>
+                <button *ngIf="!item.secret" class="btn btn-light btn-round mb-2 stack"
+                  (click)="cloneItem(editItemTpl,item, true)">
+                  <fa-icon [icon]="['fas','cog']" [fixedWidth]="true"></fa-icon>
+                  Copy App
+                </button>
+                <button *ngIf="item.secret" class="btn btn-danger btn-round mb-2 stack"
+                  (click)="buyItem(buyItemTpl,item, true)">
+                  <fa-icon [icon]="['fas','shopping-bag']" [fixedWidth]="true"></fa-icon>
+                  Protected
+                </button>
+                <p class="text-white mt-2"><strong>{{item.clone?item.clone:0}}</strong> copy</p>
+              </div>
+            </div>
+          </div>
+          <!-- <div *ngIf="!item.price" class="price-tag" style="background: green;">Free</div>
+                    <div *ngIf="item.price" class="price-tag" style="background: red;">{{item.price|number:'1.2-3'}}</div> -->
+        </div>
+      </div>
+      <div *ngIf="itemTotal>pageSize" class="d-flex justify-content-center p-3 rounded">
+        <ngb-pagination [collectionSize]="itemTotal" [pageSize]="pageSize" [(page)]="pageNumber" [maxSize]="4"
+          [rotate]="true" (pageChange)="getItemList(pageNumber)" [boundaryLinks]="true" [directionLinks]="false">
+        </ngb-pagination>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<ng-template #editItemTpl let-c="close" let-d="dismiss">
+  <div ngForm #editItemForm="ngForm">
+
+    <div class="modal-header border-0">
+      <h4 class="modal-title">App Properties</h4>
+    </div>
+    <div class="modal-body" [class.disabled]="offline">
+
+      <div class="m-a" style="max-width:10em;">
+        <div class="img-thumbnail mb-2">
+          <input type="file" style="display: none" (change)="uploadLogo($event)" id="logo" [(ngModel)]="file"
+            name="logo" accept="image/**" />
+          <label class="mb-0 d-block" for="logo">
+            <img *ngIf="!editItemData.logo" style="background: #aaa" src="assets/img/blank_product.png" width="100%">
+            <img *ngIf="editItemData.logo" src="{{baseApi}}/app/logo/{{editItemData.logo}}" alt="Image preview..."
+              onError="this.src='assets/img/blank_product.png'" style="max-width:100%">
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-form-label">App Title *</label>
+        <input type="text" class="form-control" [(ngModel)]="editItemData.title"
+          (ngModelChange)="editItemData.id||editItemData.appPath=toHyphen(editItemData.title)" name="title"
+          placeholder="ie: My First App" required>
+      </div>
+      <div class="form-group">
+        <label class="col-form-label">Description</label>
+
+        <textarea class="form-control" [(ngModel)]="editItemData.description" name="description"
+          placeholder="Description of the app"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="col-form-label">Choose Layout *</label>
+        <div class="row">
+          <div class="col-6">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="sidemenu" name="layout"
+                [(ngModel)]="editItemData.layout" value="sidemenu" required>
+              <label for="sidemenu" class="custom-control-label">Side Menu
+                <div class="ml-0 my-1">
+                  <img src="assets/img/side-menu.svg" [class.selected]="editItemData.layout=='sidemenu'" width="80%">
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="topnav" name="layout"
+                [(ngModel)]="editItemData.layout" value="topnav" required>
+              <label for="topnav" class="custom-control-label">Top Nav
+                <div class="ml-0 my-1">
+                  <img src="assets/img/top-nav.svg" [class.selected]="editItemData.layout=='topnav'" width="80%">
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="form-group">
+        <label>App Theme</label>
+        <div>
+          <div class="btn-group btn-group-toggle" ngbRadioGroup name="theme" [(ngModel)]="editItemData.theme">
+            <label ngbButtonLabel class="btn text-white" [ngStyle]="{'background-color':c?.color}"
+              *ngFor="let c of themes; let $index=index">
+              <input ngbButton type="radio" [value]="c?.color"> {{$index+1}} </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="form-group">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="published" [(ngModel)]="editItemData.published"
+              name="published">
+            <label class="custom-control-label" for="published">Published? (Appear in App Collection)</label>
+          </div>
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="shared" [(ngModel)]="editItemData.shared"
+              name="shared">
+            <label class="custom-control-label" for="shared">Share design? (Appear in others' App Designer)</label>
+          </div>
+        </div> -->
+
+      <div class="form-group">
+        <label class="control-label">App Path</label>
+        <div class="input-group">
+          <input type="text" class="form-control" [(ngModel)]="editItemData.appPath"
+            [ngModelOptions]="{updateOn: 'blur'}" #appPath="ngModel" name="appPath" [uniqueAppPath]="initialAppPath">
+          <div class="input-group-append">
+            <span class="input-group-text">.{{getHost()}}</span>
+          </div>
+        </div>
+        <small *ngIf="appPath.pending">Checking availability...</small>
+        <small *ngIf="appPath.invalid" class="text-danger">
+          <span *ngIf="appPath.errors?.uniqueAppPath">
+            App Path <strong>{{editItemData.appPath}}</strong> is already taken.
+          </span>
+        </small>
+        <small *ngIf="appPath.valid && editItemData.appPath && initialAppPath!=editItemData.appPath"
+          class="text-success">
+          App Path <strong>{{editItemData.appPath}}</strong> is available.
+        </small>
+      </div>
+      <div class="form-group" *ngIf="editItemData?.id">
+        <label class="control-label">Creator (email, comma separated)</label>
+        <input type="text" class="form-control" [(ngModel)]="editItemData.email" name="email">
+
+      </div>
+
+      <div class="form-group">
+        <label class="control-label">Sign in with</label>
+        <div class="row">
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useUnimas"
+                [disabled]="user.email.indexOf('@unimas')==-1" [(ngModel)]="editItemData.useUnimas" name="useUnimas">
+              <label class="custom-control-label text-center" for="useUnimas">
+                <fa-icon [icon]="['fas','university']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">UNIMAS Identity</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useGoogle" [(ngModel)]="editItemData.useGoogle"
+                name="useGoogle">
+              <label class="custom-control-label text-center" for="useGoogle">
+                <fa-icon [icon]="['fab','google']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Google Account</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useFacebook"
+                [(ngModel)]="editItemData.useFacebook" name="useFacebook">
+              <label class="custom-control-label text-center" for="useFacebook">
+                <fa-icon [icon]="['fab','facebook-f']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Facebook Account</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useGithub" [(ngModel)]="editItemData.useGithub"
+                name="useGithub">
+              <label class="custom-control-label text-center" for="useGithub">
+                <fa-icon [icon]="['fab','github']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Github Account</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useLinkedin"
+                [(ngModel)]="editItemData.useLinkedin" name="useLinkedin">
+              <label class="custom-control-label text-center" for="useLinkedin">
+                <fa-icon [icon]="['fab','linkedin']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">LinkedIn Account</div>
+              </label>
+            </div>
+          </div>
+
+          <div class="col-4 mb-3">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="useEmail" [(ngModel)]="editItemData.useEmail"
+                name="useEmail">
+              <label class="custom-control-label text-center" for="useEmail">
+                <fa-icon [icon]="['far','envelope']" [fixedWidth]="true" size="2x"></fa-icon>
+                <div class="small">Use Email (Signup)</div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+    <div class="modal-footer border-0 justify-content-between">
+      <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+      <button type="button" class="btn btn-round btn-primary" [class.disabled]="offline"
+        [disabled]="editItemForm.invalid" (click)="c(editItemData)">
+        <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+        <!-- <i class="fa fa-plus"></i> -->
+        Save App
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #buyItemTpl let-c="close" let-d="dismiss">
+  <div>
+
+    <div class="modal-header border-0">
+      <h5 class="modal-title">App require activation</h5>
+    </div>
+    <div class="modal-body">
+
+      <div class="m-a" style="max-width:10em;">
+        <div class="img-thumbnail mb-2">
+          <img *ngIf="!buyItemData.logo" style="background: #aaa" src="assets/img/blank_product.png" width="100%">
+          <img *ngIf="buyItemData.logo" src="{{baseApi}}/app/logo/{{buyItemData.logo}}" alt="Image preview..."
+            onError="this.src='assets/img/blank_product.png'" style="max-width:100%">
+        </div>
+      </div>
+      <h4>{{buyItemData.title}}</h4>
+      <p>{{buyItemData.description}}</p>
+
+      <p>This application is protected. Please contact <strong>{{buyItemData.email}}</strong> for more details</p>
+
+      <!-- Already REQUEST COPY -->
+      <ng-container *ngIf="activationStatus[buyItemData.id]">
+
+        Your copy request status is <strong>{{activationStatus[buyItemData.id]}}</strong>
+
+        <!-- <ng-container *ngIf="activationStatus[buyItemData.id]=='activated'">
+          <button (click)="requestCopy()">Request a copy</button>
+        </ng-container> -->
+
+
+      </ng-container>
+
+      <!-- Havent request COPY -->
+      <!-- <ng-container *ngIf="!activationStatus[buyItemData.id]">
+
+        <button (click)="requestCopy()">Request a copy</button>
+
+      </ng-container> -->
+
+
+    </div>
+    <div class="modal-footer border-0 justify-content-between">
+
+      <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+      <ng-container *ngIf="!activationStatus[buyItemData.id]">
+        <button type="button" class="btn btn-round btn-primary" (click)="requestCopy()">
+          Request Copy
+        </button>
+      </ng-container>
+      <ng-container *ngIf="activationStatus[buyItemData.id] && activationStatus[buyItemData.id]=='activated'">
+        <button type="button" class="btn btn-round btn-success" (click)="cloneItem(editItemTpl,buyItemData, true, d)">
+          Copy App
+        </button>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>

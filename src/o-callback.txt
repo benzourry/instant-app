@@ -1,0 +1,36 @@
+var loadr = document.getElementById("loadr");
+        var message = document.getElementById("msg");
+        var messageContent = document.getElementById("msg-c");
+
+        var gP = function(name){
+            var regex = new RegExp('[\\?&]'+name+'=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        var token = gP('token')
+        if (token) {
+            var identity = {
+                access_token: token
+            };
+            window.sessionStorage.setItem("identity", JSON.stringify(identity));
+            fetch(OAUTH.USER_URI,{headers: {'Authorization': 'Bearer '+ token}})
+            .then(function (response) {
+                response.json().then(function (json) {
+                    if (!json.error){
+                        window.sessionStorage.setItem("user", JSON.stringify(json));
+                        window.location.href = OAUTH.FINAL_URI;
+                    }else{
+                        loadr.style.display='none';
+                        message.style.display="block";
+                        messageContent.innerHTML=json.error;
+                    }
+                    
+                });
+            });
+
+        } else {
+            loadr.style.display='none';
+            message.style.display="block";
+            messageContent.innerHTML=gP('error');
+        }

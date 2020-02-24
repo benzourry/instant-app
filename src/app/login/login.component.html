@@ -1,0 +1,74 @@
+<div class="d-flex justify-content-center align-items-center flex-column wrapper">
+    <img class="mb-4" src="assets/icons/logo.svg" width="128" />
+    <div class="d-flex flex-column wrapper-in">
+        <button class="btn text-left btn-round btn-primary m-1 px-2 pr-3" [class.disabled]="useEmail"
+            (click)="login('unimas')">
+            <fa-icon [icon]="['fas','university']" [fixedWidth]="true"></fa-icon>
+            Login with UNIMAS
+        </button>
+        <button class="btn text-left btn-round btn-primary m-1 px-2 pr-3" [class.disabled]="useEmail"
+            (click)="login('google')">
+            <fa-icon [icon]="['fab','google']" [fixedWidth]="true"></fa-icon>
+            Login with Google
+        </button>
+        <div class="text-center d-flex justify-content-between">
+            <button class="btn text-left btn-round btn-outline-primary m-1 px-2" [class.disabled]="useEmail"
+                title="Login with Facebook" (click)="login('facebook')">
+                <fa-icon [icon]="['fab','facebook-f']" [fixedWidth]="true"></fa-icon>
+                <!-- Login with Facebook -->
+            </button>
+            <button class="btn text-left btn-round btn-outline-primary m-1 px-2" [class.disabled]="useEmail"
+                title="Login with GitHub" (click)="login('github')">
+                <fa-icon [icon]="['fab','github']" [fixedWidth]="true"></fa-icon>
+                <!-- Login with Github -->
+            </button>
+            <button class="btn text-left btn-round btn-outline-primary m-1 px-2" [class.disabled]="useEmail"
+                title="Login with LinkedIn" (click)="login('linkedin')">
+                <fa-icon [icon]="['fab','linkedin']" [fixedWidth]="true"></fa-icon>
+                <!-- Login with LinkedIn -->
+            </button>
+            <button class="btn text-left btn-round m-1 px-2 align-items-center text-center flex-column" style="flex:1"
+                [ngClass]="useEmail?'btn-secondary':'btn-outline-secondary'" title="Login/Signup with email"
+                (click)="useEmail = !useEmail">
+                <fa-icon [icon]="['fas','ellipsis-h']" [fixedWidth]="true"></fa-icon>
+                <!-- Login with LinkedIn -->
+            </button>
+        </div>
+    </div>
+
+    <ng-container *ngIf="useEmail">
+        <p class="text-center py-2 my-1">or sign in using email</p>
+
+        <div class="d-flex flex-column wrapper-in mb-3">
+            <form class="p-2" #loginForm="ngForm">
+                <input class="form-control rounded-50 m-1 w-unset" *ngIf="register" type="text" name="name"
+                    [(ngModel)]="cred.name" placeholder="Name" required>
+                <input class="form-control rounded-50 m-1 w-unset" type="text" name="email" [(ngModel)]="cred.email"
+                    placeholder="Email" required>
+                <input class="form-control rounded-50 m-1 w-unset" type="password" name="password"
+                    [(ngModel)]="cred.password" placeholder="Password" required>
+
+                <div *ngIf="!register" class="text-center d-flex justify-content-between">
+                    <button class="btn text-left btn-round btn-outline-secondary m-1 px-3" (click)="register=true">
+                        Signup</button>
+                    <button class="btn text-left btn-round btn-primary m-1 px-3" [disabled]="loginForm.invalid" (click)="signin(cred)">
+                        Login</button>
+
+                </div>
+                <div *ngIf="register" class="text-center d-flex justify-content-between">
+                    <button class="btn text-left btn-round btn-outline-secondary m-1 px-3"
+                     (click)="register=false">
+                        Cancel</button>
+                    <button class="btn text-left btn-round btn-primary m-1 px-3" [disabled]="loginForm.invalid" (click)="signup(cred)">
+                        Signup</button>
+                </div>
+            </form>
+        </div>
+    </ng-container>
+
+    <div class="small m-2 text-center">By signing in, you agree to <br/> our <a [href]="privacyPolicy" target="_blank">Privacy Policy</a></div>
+
+    <!-- <small class="fixed-bottom">Privacy Policy</small> -->
+
+
+</div>

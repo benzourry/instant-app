@@ -1,0 +1,2415 @@
+<div class="wrapper">
+    <div class="sidebar">
+        <div class="p-3">
+            <h4>{{data?.title}}</h4>
+
+            <p>{{data?.description}}</p>
+
+            <a class="btn btn-round btn-success px-3" routerLink="/run/{{data?.id}}">
+                <fa-icon [icon]="['fas','play']" [fixedWidth]="true"></fa-icon>
+                Run App
+            </a>
+            <button class="btn btn-round btn-info ml-1" (click)="popShare(data?.id)">
+                <fa-icon [icon]="['fas','share-alt']" [fixedWidth]="true"></fa-icon>
+            </button>
+        </div>
+        <div class="group-list">
+            <div class="p-3 text-centered" *ngIf="formLoading">
+                <div class="lds-ellipsis white">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <div class="mb-3" *ngIf="!formLoading">
+                <a (click)="getFormData(form.id)" [routerLink]="['/design',data.id]" [queryParams]="{fId:form?.id}"
+                    [class.active]="form?.id==curForm?.id" *ngFor="let form of formList | filter: formSearchText">
+                    <div class="list-group-item-heading">
+                        {{form?.title}}
+                    </div>
+
+                    <div class="list-group-item-text nobreak">{{form?.description}}</div>
+                </a>
+                <a class="pointer" (click)="editForm(editFormTpl,{nav:'simple',type:'db'},true)">
+                    <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                    Add Form
+                </a>
+            </div>
+
+            <div class="p-2">
+                <ngb-pagination *ngIf="formTotal>formPageSize" size="sm" [collectionSize]="formTotal" [pageSize]="formPageSize"
+                    [(page)]="formPageNo" [maxSize]="5" (pageChange)="getFormList(formPageNo)" [boundaryLinks]="false"
+                    [directionLinks]="false"></ngb-pagination>
+            </div>
+
+            <div class="mb-3">
+                <a class="pointer" (click)="viewCopyRequest(crListTpl)">
+                    <fa-icon class="float-left" [icon]="['fas','copy']" [fixedWidth]="true"></fa-icon>
+                    <div class="list-group-item-heading ml-4">
+                        Copy Request
+                    </div>
+                    <div class="list-group-item-text nobreak ml-4">View Copy Request list</div>
+                </a>
+            </div>
+
+        </div>
+
+        
+    </div>
+    <div class="content">
+        <div class="limit-width fix-gutter">
+
+            <div class="p-3" *ngIf="!curForm" style="color:#aaa;">
+                <h3>Please select form on the left to start</h3>
+            </div>
+            <div *ngIf="curForm">
+                <div class="repo-title text-centered p-3">
+
+                    <h3>{{curForm.title}}</h3>
+
+                    <p>{{curForm.description}}</p>
+
+                    <div *ngIf="curForm">
+                        <button class="btn btn-round btn-secondary" (click)="viewItems(viewItemsTpl)">
+                            <fa-icon [icon]="['fas','list-alt']" [fixedWidth]="true"></fa-icon>
+                        </button>
+                        <button class="btn btn-round btn-secondary ml-1" (click)="editForm(editFormTpl,curForm)">
+                            <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                        </button>
+                        <button class="btn btn-round btn-secondary ml-1 mr-1"
+                            (click)="removeForm(removeFormTpl,curForm)">
+                            <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                        </button>
+                        <a class="btn btn-round btn-success" *ngIf="curForm.type=='db'"
+                            routerLink="/run/{{data?.id}}/form/{{curForm.id}}/add">
+                            <fa-icon [icon]="['fas','play']" [fixedWidth]="true"></fa-icon>
+                        </a>
+                    </div>
+
+                </div>
+
+                <ngb-tabset justify="center" class="tab-custom centered">
+
+                    <ngb-tab title="Forms">
+                        <ng-template ngbTabContent>
+                            <div class="single-pane">
+                                <div style="text-align:center" *ngIf="curForm.nav!='simple'">
+                                    <div class="btn-group flex-wrap btn-group-sm text-centered">
+                                        <button class="btn btn-outline-secondary element mt-1"
+                                            *ngFor="let tab of curForm.tabs|orderBy: 'sortOrder'; let $last=last; let $first=first; let $index=index"
+                                            [ngClass]="tab.altClass">
+                                            <span class="element-item">{{tab.title}}</span>
+                                            <div class="element-edit shadow-sm leafup nowrap">
+                                                <button class="btn btn-round btn-sm btn-info"
+                                                    (click)="editTab(editTabTpl,tab)">
+                                                    <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true">
+                                                    </fa-icon>
+                                                </button>
+                                                <button class="btn btn-round btn-sm btn-info"
+                                                    (click)="removeTab(removeTabTpl,tab)">
+                                                    <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                                                </button>
+                                                <button class="btn btn-info btn-round btn-sm" *ngIf="!$first"
+                                                    (click)="reorderTab($index, -1)">
+                                                    <fa-icon [icon]="['fas','arrow-left']" [fixedWidth]="true">
+                                                    </fa-icon>
+                                                </button>
+                                                <button class="btn btn-info btn-round btn-sm" *ngIf="!$last"
+                                                    (click)="reorderTab($index, 1)">
+                                                    <fa-icon [icon]="['fas','arrow-right']" [fixedWidth]="true">
+                                                    </fa-icon>
+                                                </button>
+                                            </div>
+                                        </button>
+                                        <button class="btn btn-outline-secondary mt-1"
+                                            (click)="editTab(editTabTpl,{sortOrder:curForm.tabs.length}, true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                        </button>
+                                    </div>
+                                </div>
+
+
+
+                                <div *ngFor="let t of curForm.sections|groupBy:'parent'">
+                                    <div class="mt-3 text-center" *ngIf="curForm.nav!='simple'">
+                                        <h4 *ngIf="getTab(t.key)">{{getTab(t.key).title}}</h4>
+                                        <h4 class="text-muted" *ngIf="!getTab(t.key)">(unspecified)</h4>
+                                    </div>
+                                    <div class="row grid-animate editor">
+                                        <div [class.m-a]="t.value.length==1" [ngClass]="e?.size||'col-sm-12'"
+                                            *ngFor="let e of t.value;let $s_first=first; let $s_last=last; let $s_index=index">
+                                            <div class="card mb-3" [ngClass]="e.main?'border-primary':''">
+                                                <div class="card-header p-3 bordered element"
+                                                    [ngClass]="[e.altClass||'']">
+                                                    <div class="element-item">
+                                                        <h5 class="m-0">
+                                                            {{e.title}}
+                                                            <span class="float-right">
+                                                                <fa-icon [icon]="['fas','sitemap']"
+                                                                    *ngIf="e.type=='list'" [fixedWidth]="true">
+                                                                </fa-icon>
+                                                                <fa-icon [icon]="['fas','window-restore']"
+                                                                    *ngIf="e.type=='approval'" [fixedWidth]="true">
+                                                                </fa-icon>
+                                                            </span>
+                                                        </h5>
+                                                        <div class="card-text" *ngIf="e.description"
+                                                            [innerHtml]="e.description"></div>
+                                                    </div>
+
+                                                    <div class="element-edit mt-1"
+                                                        style="position:absolute;top:5px;right:10px;">
+                                                        <button class="btn btn-info btn-round btn-sm"
+                                                            (click)="editSection(editSectionTpl,e)">
+                                                            <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true">
+                                                            </fa-icon>
+                                                        </button>
+                                                        <button class="btn btn-info btn-round btn-sm"
+                                                            (click)="removeSection(removeSectionTpl,e)">
+                                                            <fa-icon [icon]="['fas','trash']" [fixedWidth]="true">
+                                                            </fa-icon>
+                                                        </button>
+                                                        <button class="btn btn-info btn-round btn-sm" *ngIf="!$s_first"
+                                                            (click)="reorderSection(t.value,$s_index, -1)">
+                                                            <fa-icon [icon]="['fas','arrow-left']" [fixedWidth]="true">
+                                                            </fa-icon>
+                                                        </button>
+                                                        <button class="btn btn-info btn-round btn-sm" *ngIf="!s_$last"
+                                                            (click)="reorderSection(t.value,$s_index, 1)">
+                                                            <fa-icon [icon]="['fas','arrow-right']" [fixedWidth]="true">
+                                                            </fa-icon>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="row">
+                                                        <div class="col-md-12" *ngIf="e?.items.length==0">
+                                                            <div class="text-muted text-centered">
+                                                                <h1>:(</h1>
+                                                                <h4>No form item specified</h4>
+                                                            </div>
+                                                        </div>
+                                                        <ng-container
+                                                            *ngFor="let f of e?.items; let $f_index=index; let $f_first=first; let $f_last=last">
+                                                            <div class="element"
+                                                                [class.half]="curForm?.items[f.code]?.hidden"
+                                                                [ngClass]="[f.altClass||'',curForm?.items[f.code]?.size||'col-sm-12']">
+                                                                <div class="p-2 border rounded mb-3"
+                                                                    *ngIf="!curForm?.items[f.code]">Source
+                                                                    Item Not Available</div>
+                                                                <field-edit class="element-item" name="fn-{{f.id}}"
+                                                                    *ngIf="curForm?.items[f.code]"
+                                                                    [field]="curForm?.items[f.code]"
+                                                                    [lookupList]="lookup[f.code]"
+                                                                    [(ngModel)]="mod[f.code]" [always]="true"
+                                                                    [required]="curForm?.items[f.code]?.v?.required"
+                                                                    [maxlength]="curForm?.items[f.code]?.v?.maxlength"
+                                                                    [minlength]="curForm?.items[f.code]?.v?.minlength"
+                                                                    [pattern]="curForm?.items[f.code]?.v?.pattern">
+                                                                </field-edit>
+
+                                                                <div class="element-edit mt-1"
+                                                                    style="position:absolute;top:3px;right:10px;">
+                                                                    <button class="btn btn-info btn-round btn-sm"
+                                                                        (click)="editItem(editItemTpl,e.id,curForm.items[f.code],f.sortOrder)">
+                                                                        <fa-icon [icon]="['fas','pencil-alt']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                    <button class="btn btn-info btn-round btn-sm"
+                                                                        (click)="removeItem(removeItemTpl,f)">
+                                                                        <fa-icon [icon]="['fas','trash']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                    <button class="btn btn-info btn-round btn-sm"
+                                                                        *ngIf="!$f_first"
+                                                                        (click)="reorderItem(e,$f_index, -1)">
+                                                                        <fa-icon [icon]="['fas','arrow-left']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                    <button class="btn btn-info btn-round btn-sm"
+                                                                        *ngIf="!$f_last"
+                                                                        (click)="reorderItem(e,$f_index, 1)">
+                                                                        <fa-icon [icon]="['fas','arrow-right']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer p-3 text-centered">
+                                                    <a class="pointer"
+                                                        (click)="editItem(editItemTpl,e.id,{size:'col-sm-12', hideLabel:false},e.items.length,true)">
+                                                        <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                                        Add Form Item
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row grid-animate" *ngIf="curForm.sections?.length==0">
+                                    <div class="m-a col-sm-12">
+                                        <div class="p-4 text-muted text-centered">
+                                            <h1>:(</h1>
+                                            <h4>No section specified</h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="row">
+                                    <div class="col-12 text-centered p-2">
+                                        <a class="p-2 pointer"
+                                            (click)="editSection(editSectionTpl,{sortOrder:curForm.sections.length, size:'col-sm-12',type:'section'},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                            Add Section
+                                        </a>
+                                        <a class="p-2 pointer"
+                                            (click)="editSection(editSectionTpl,{sortOrder:curForm.sections.length, size:'col-sm-12',type:'list'},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                            Add Sub Form
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+                    <ngb-tab title="Process" *ngIf="curForm.type=='db'">
+                        <ng-template ngbTabContent>
+                            <div class="single-pane">
+                                <!-- <div class="card mb-2">
+                                    <div class="card-header p-3">
+                                        Tier Setting
+                                    </div> -->
+
+                                <div *ngIf="curForm.tiers.length>0">
+                                    <div class="ball" style="min-height:55px;">
+                                        <div
+                                            style="padding: 0px 10px;float:left;font-weight: bold;position:absolute;background: #ccc; height:40px; border:solid 4px #ccc;color:#fff; border-radius:20px; font-size:20px; text-align: center; line-height: 32px;">
+                                            Submission
+                                        </div>
+                                        <!-- <div class="element" style="margin-left: 55px; min-height:55px;">
+                                                    </div> -->
+                                    </div>
+                                    <div class="ball" *ngFor="let tier of  curForm.tiers; let $index=index"
+                                        [ngClass]="tier.altClass">
+                                        <div
+                                            style="float:left;width:40px;font-weight: bold;position:absolute;background: white; height:40px; border:solid 4px #ccc;color:#ccc; border-radius:50%; font-size:20px; text-align: center; line-height: 32px;">
+                                            {{$index+1}}
+                                        </div>
+                                        <div class="element" style="margin-left: 55px; min-height:55px;">
+                                            <div class="element-edit" style="position:absolute;top:5px;right:10px;">
+                                                <button class="btn btn-round btn-info btn-sm" *ngIf="!$first"
+                                                    (click)="reorderTier($index, -1)">
+                                                    <fa-icon [icon]="['fas','arrow-up']" [fixedWidth]="true">
+                                                    </fa-icon>
+                                                </button>
+                                                <button class="btn btn-round btn-info btn-sm" *ngIf="!$last"
+                                                    (click)="reorderTier($index, 1)">
+                                                    <fa-icon [icon]="['fas','arrow-down']" [fixedWidth]="true">
+                                                    </fa-icon>
+                                                </button>
+                                                <button class="btn btn-round btn-info btn-sm"
+                                                    (click)="editTier(editTierTpl,tier)">
+                                                    <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true">
+                                                    </fa-icon>
+                                                </button>
+                                                <button class="btn btn-round btn-info btn-sm"
+                                                    (click)="removeTier(removeTierTpl,tier)">
+                                                    <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                                                </button>
+                                            </div>
+
+                                            <div class="element-item">
+                                                <div style="font-size:18px;">{{tier.name}}</div>
+
+                                                <!-- <div class="mt-2 mb-2">Tier type
+                                                        <fa-icon [icon]="['fas','angle-double-right']"
+                                                            [fixedWidth]="true"></fa-icon>
+                                                        {{tier.type}}
+                                                    </div> -->
+                                                <div class="small mt-2 mb-2" *ngIf="tier.type=='ALL'">
+                                                    Any user with access may approve
+                                                </div>
+                                                <div class="small mt-2 mb-2" *ngIf="tier.type=='ASSIGN'">
+                                                    <span class="mr-1 mb-2">Approver will be assigned by</span>
+                                                    <ul>
+                                                        <li *ngFor="let i of getAsList(curForm.admin)">
+                                                            {{i}}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="small mt-2 mb-2" *ngIf="tier.type=='DYNAMIC'">
+                                                    Dynamic approver from <code>{{tier.orgMapPointer}}</code>
+                                                    in <code>{{tier.orgMap}}</code>
+                                                    <!-- <fa-icon [icon]="['fas','angle-right']" [fixedWidth]="true">
+                                                        </fa-icon>
+                                                        {{tier.orgMapPointer}} -->
+                                                </div>
+                                                <div class="small mt-2 mb-2" *ngIf="tier.type=='FIXED'">
+                                                    <span class="mr-1 mb-2">Fixed approver to </span>
+                                                    <ul>
+                                                        <li *ngFor="let i of getAsList(tier.approver)">
+                                                            {{i}}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div *ngIf="!tier.alwaysApprove">
+                                                    <div
+                                                        style="height:4px; width:35px; background:#ccc; position:relative;top:14px;left:-35px;">
+                                                    </div>
+                                                    <span class="btn-group btn-group-xs disabled-region mr-2 mb-1">
+                                                        <button class="btn btn-outline-secondary nowrap"
+                                                            *ngIf="tier.canApprove">Approve
+                                                            <fa-icon *ngIf="tier.approveMailer"
+                                                                [icon]="['far','envelope']" [fixedWidth]="true">
+                                                            </fa-icon>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary nowrap"
+                                                            *ngIf="tier.canReject">Reject
+                                                            <fa-icon *ngIf="tier.rejectMailer"
+                                                                [icon]="['far','envelope']" [fixedWidth]="true">
+                                                            </fa-icon>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary nowrap"
+                                                            *ngIf="tier.canReturn">Return
+                                                            <fa-icon *ngIf="tier.returnMailer"
+                                                                [icon]="['far','envelope']" [fixedWidth]="true">
+                                                            </fa-icon>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary nowrap"
+                                                            *ngIf="tier.canSkip">Skip</button>
+                                                    </span>
+                                                    <button *ngIf="tier.canRemark" type="text"
+                                                        class="btn btn-xs btn-outline-secondary disabled-region rounded-0 mb-1">
+                                                        <fa-icon [icon]="['far','comment-dots']" [fixedWidth]="true">
+                                                        </fa-icon> Remark
+                                                    </button>
+                                                </div>
+                                                <div class="disabled-region" *ngIf="tier.alwaysApprove">
+                                                    <button class="btn btn-xs btn-outline-secondary">
+                                                        <fa-icon [icon]="['fas','circle-notch']" [fixedWidth]="true">
+                                                        </fa-icon>
+                                                        Always Approve mode
+                                                    </button>
+                                                </div>
+                                                <div class="mt-3 small" *ngIf="tier.section">
+                                                    Custom Form
+                                                    <fa-icon [icon]="['fas','angle-double-right']" [fixedWidth]="true">
+                                                    </fa-icon>
+                                                    {{tier.section.title}}
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                    <div class="ball" style="min-height:55px;">
+                                        <button class="btn btn-primary btn-round"
+                                            (click)="editTier(editTierTpl,{sortOrder:curForm.tiers.length, canApprove:true, canReject:true, canReturn:true, canRemark:true},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon> Add New
+                                            Tier
+                                        </button>
+                                    </div>
+                                    <div class="ball" style="min-height:55px;">
+                                        <div
+                                            style="padding: 0px 10px;float:left;font-weight: bold;position:absolute;background: #ccc; height:40px; border:solid 4px #ccc;color:#fff; border-radius:20px; font-size:20px; text-align: center; line-height: 32px;">
+                                            Complete
+                                        </div>
+                                    </div>
+                                </div>
+                                <div *ngIf="curForm.tiers.length==0">
+                                    <div class="p-4 text-muted text-centered">
+                                        <h1>:(</h1>
+                                        <h4>No tier specified</h4>
+                                        <button class="btn btn-primary btn-round mt-3"
+                                            (click)="editTier(editTierTpl,{sortOrder:curForm.tiers.length, canApprove:true, canReject:true, canReturn:true, canRemark:true},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon> Add New
+                                            Tier
+                                        </button>
+
+                                    </div>
+                                </div>
+
+                                <!-- <div class="card-footer p-3 text-center">
+                                        <a class="pointer"
+                                            (click)="editTier(editTierTpl,{sortOrder:curForm.tiers.length, canApprove:true, canReject:true, canReturn:true, canRemark:true},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                            Add Tier
+                                        </a>
+                                    </div> -->
+                                <!-- </div> -->
+                                <div class="card mb-2" *ngIf="curForm.admin">
+                                    <div class="card-header p-3 bordered">
+                                        Admin List
+                                    </div>
+                                    <div class="list-group">
+                                        <div class="list-group-item p-3" *ngFor="let i of getAsList(curForm.admin)">
+                                            {{i}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+                    <ngb-tab title="Dataset">
+                        <ng-template ngbTabContent>
+
+                            <div class="single-pane">
+
+                                <div class="m-a col-sm-12" *ngIf="curForm.datasets?.length==0">
+                                    <div class="p-4 text-muted text-centered">
+                                        <h1>:(</h1>
+                                        <h4>No dataset specified</h4>
+                                    </div>
+                                </div>
+
+                                <ng-container *ngFor="let ds of curForm.datasets">
+                                    <div class="mb-2">
+                                        <div class="card card-default">
+                                            <div class="card-header p-3 bordered element">
+                                                <div class="element-item">
+                                                    <div>
+                                                        <h5 class="m-0">{{ds.title}}</h5>
+                                                        <p class="card-text">{{ds.description}}</p>
+                                                    </div>
+
+                                                </div>
+                                                <div class="element-edit mt-1"
+                                                    style="position:absolute;top:5px;right:10px;">
+                                                    <button class="btn btn-info btn-round btn-sm"
+                                                        (click)="editDataset(editDatasetTpl,ds)">
+                                                        <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true">
+                                                        </fa-icon>
+                                                    </button>
+                                                    <button class="btn btn-info btn-round btn-sm"
+                                                        (click)="removeDataset(removeDatasetTpl,ds)">
+                                                        <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-3">
+
+                                                <label>Included Fields</label>
+                                                <!-- {{prevForm|json}} -->
+                                                <div class="d-flex flex-row flex-wrap" *ngIf="ds.items">
+                                                    <div class="element ml-0 mt-1 mb-1 mr-2 py-2 px-3 border border-secondary"
+                                                        style="min-width:5.5em" [ngClass]="field.altClass"
+                                                        *ngFor="let field of ds.items; let $index=index;let $first=first; let $last=last">
+                                                        <div class="element-item">
+                                                            <div style="font-size: 12px;" *ngIf="field.root=='data'">
+                                                                {{curForm.title}}</div>
+                                                            <div style="font-size: 12px;" *ngIf="field.root=='prev'">
+                                                                {{prevForm?.title}}</div>
+                                                            <span
+                                                                *ngIf="field.root=='data'">{{curForm.items[field.code]?.label}}</span>
+                                                            <span
+                                                                *ngIf="field.root=='prev'">{{prevForm?.items[field.code]?.label}}</span>
+                                                        </div>
+                                                        <div class="element-edit shadow-sm leafup">
+                                                            <div class=" d-flex">
+                                                                <button class="btn btn-info btn-round btn-sm"
+                                                                    *ngIf="!$first" (click)="reorderDs(ds,$index, -1)">
+                                                                    <fa-icon [icon]="['fas','arrow-left']"
+                                                                        [fixedWidth]="true"></fa-icon>
+                                                                </button>
+                                                                <button class="btn btn-info btn-round btn-sm"
+                                                                    *ngIf="!$last" (click)="reorderDs(ds,$index, 1)">
+                                                                    <fa-icon [icon]="['fas','arrow-right']"
+                                                                        [fixedWidth]="true"></fa-icon>
+                                                                </button>
+                                                                <button class="btn btn-info btn-round btn-sm"
+                                                                    (click)="removeDsItem(field)">
+                                                                    <fa-icon [icon]="['fas','trash']"
+                                                                        [fixedWidth]="true"></fa-icon>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="clearfix"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+
+                                <div class="row">
+                                    <div class="col-12 text-centered p-2">
+                                        <a class="p-2 pointer"
+                                            (click)="editDataset(editDatasetTpl,{fields:[],items:[]},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                            Add Dataset
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+                    <ngb-tab title="Dashboard">
+                        <ng-template ngbTabContent>
+
+                            <div class="single-pane">
+
+                                <div class="m-a col-sm-12" *ngIf="curForm.dashboards?.length==0">
+                                    <div class="p-4 text-muted text-centered">
+                                        <h1>:(</h1>
+                                        <h4>No dashboard specified</h4>
+                                    </div>
+                                </div>
+
+                                <ng-container *ngFor="let ds of curForm.dashboards">
+                                    <div class="mb-2">
+                                        <div class="card card-default">
+                                            <div class="card-header p-3 bordered element">
+                                                <div class="element-item">
+                                                    <div>
+                                                        <h5 class="m-0">{{ds.title}}</h5>
+                                                        <p class="card-text">{{ds.description}}</p>
+                                                    </div>
+
+                                                </div>
+                                                <div class="element-edit mt-1"
+                                                    style="position:absolute;top:5px;right:10px;">
+                                                    <button class="btn btn-info btn-round btn-sm"
+                                                        (click)="editDashboard(editDashboardTpl,ds)">
+                                                        <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true">
+                                                        </fa-icon>
+                                                    </button>
+                                                    <button class="btn btn-info btn-round btn-sm"
+                                                        (click)="removeDashboard(removeDashboardTpl,ds)">
+                                                        <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-3">
+
+                                                <div class="row grid-animate">
+                                                    <div class="col-md-12" *ngIf="ds?.charts.length==0">
+                                                        <div class="p-4 text-muted text-centered">
+                                                            <h1>:(</h1>
+                                                            <h4>No chart specified</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div [ngClass]="e.size"
+                                                        *ngFor="let e of ds.charts; let $c_index=index; let $c_first=first; let $c_last=last">
+                                                        <div class="card mb-2 element bg-light border-secondary"
+                                                            [ngClass]="e.altClass"
+                                                            [ngStyle]="{'padding-bottom.%':e.height}">
+                                                            <div class="card-body pointer element d-flex"
+                                                                style="text-overflow: ellipsis; overflow: hidden; position:absolute;top:0; bottom: 0;left: 0;right: 0;justify-content: center">
+                                                                <div class="element-item text-center"
+                                                                    style="align-self:center">
+                                                                    <h6 class="card-title">{{e.title}}</h6>
+                                                                    <p class="card-subtitle" *ngIf="e.description">
+                                                                        {{e.description}}</p>
+                                                                    <div style="color:darkgray; text-align: center">
+                                                                        <fa-icon [icon]="['fas','chart-pie']" size="5x"
+                                                                            *ngIf="e.type=='pie'" [fixedWidth]="true">
+                                                                        </fa-icon>
+                                                                        <fa-icon [icon]="['far','circle']" size="5x"
+                                                                            *ngIf="e.type=='doughnut'"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                        <fa-icon [icon]="['fas','chart-bar']" size="5x"
+                                                                            *ngIf="e.type=='bar'" [fixedWidth]="true">
+                                                                        </fa-icon>
+                                                                        <fa-icon [icon]="['fas','chart-line']" size="5x"
+                                                                            *ngIf="e.type=='line'" [fixedWidth]="true">
+                                                                        </fa-icon>
+                                                                        <fa-icon [icon]="['fas','chart-area']" size="5x"
+                                                                            *ngIf="e.type=='area'" [fixedWidth]="true">
+                                                                        </fa-icon>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="element-edit"
+                                                                    style="position:absolute;top:5px;right:10px;">
+                                                                    <button class="btn btn-round btn-info btn-sm"
+                                                                        *ngIf="!$c_first"
+                                                                        (click)="reorderChart(ds,$c_index, -1)">
+                                                                        <fa-icon [icon]="['fas','arrow-up']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                    <button class="btn btn-round btn-info btn-sm"
+                                                                        *ngIf="!$c_last"
+                                                                        (click)="reorderChart(ds,$c_index, 1)">
+                                                                        <fa-icon [icon]="['fas','arrow-down']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                    <button class="btn btn-round btn-info btn-sm"
+                                                                        (click)="editChart(editChartTpl,ds.id,e)">
+                                                                        <fa-icon [icon]="['fas','pencil-alt']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                    <button class="btn btn-round btn-info btn-sm"
+                                                                        (click)="removeChart(removeChartTpl,e)">
+                                                                        <fa-icon [icon]="['fas','trash']"
+                                                                            [fixedWidth]="true"></fa-icon>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer p-3 text-centered">
+                                                <a class="pointer"
+                                                    (click)="editChart(editChartTpl,ds.id,{sortOrder:ds.charts.length, size:'col-sm-12', height:'100'},true)">
+                                                    <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                                    Add Chart
+                                                </a>
+
+                                                <!-- <div class="clearfix"></div> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+
+                                <div class="row">
+                                    <div class="col-12 text-centered p-2">
+                                        <a class="p-2 pointer"
+                                            (click)="editDashboard(editDashboardTpl,{charts:[]},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                            Add Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+
+                    <ngb-tab title="Custom Screen">
+                        <ng-template ngbTabContent>
+
+                            <div class="single-pane">
+
+                                <div class="m-a col-sm-12" *ngIf="curForm.screens?.length==0">
+                                    <div class="p-4 text-muted text-centered">
+                                        <h1>:(</h1>
+                                        <h4>No screen specified</h4>
+                                    </div>
+                                </div>
+
+
+                                <div class="tile-wrap" *ngIf="curForm.screens?.length>0">
+                                    <div class="tile" *ngFor="let ds of curForm.screens"
+                                        style="text-overflow: ellipsis;">
+                                        <!-- <div class="notch" [ngStyle]="{'background-color':item.theme}"></div> -->
+                                        <!-- <div class="tile-image"
+                                                [ngStyle]="item.logo && {'background-image':'url('+baseApi+'/app/logo/'+item.logo+')'}"></div> -->
+                                        <div class="tile-mid">
+                                            <div class="tile-content">
+
+                                                <h6 class="list-group-item-heading">{{ds.title}}
+                                                </h6>
+                                                <p class="desc">{{ds.description}}</p>
+                                            </div>
+
+                                            <div class="tile-action">
+                                                <button class="btn btn-light btn-round mb-1"
+                                                    (click)="editScreen(editScreenTpl,ds)">
+                                                    <fa-icon [icon]="['fas','cog']" [fixedWidth]="true"></fa-icon>
+                                                    Edit
+                                                </button>
+                                                <button class="btn btn-danger btn-round mb-1" [class.disabled]="offline"
+                                                    (click)="removeScreen(removeScreenTpl,ds)">
+                                                    <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                                                    Remove
+                                                </button>
+                                            </div>
+
+                                            <div class="position-absolute p-2 text-center text-white"
+                                                style="bottom: 0px; left:0; right:0; background-color: gray">
+                                                <span *ngIf="ds.type == 'qr'">
+                                                    <fa-icon [icon]="['fas','qrcode']" [fixedWidth]="true"></fa-icon>
+                                                    QR Scanner
+                                                </span>
+                                                <span *ngIf="ds.type == 'search'">
+                                                    <fa-icon [icon]="['fas','search']" [fixedWidth]="true"></fa-icon>
+                                                    Search Page
+                                                </span>
+                                                <span *ngIf="ds.type == 'static'">
+                                                    <!-- <fa-icon [icon]="['fas','search']" [fixedWidth]="true"></fa-icon> -->
+                                                    Static Page
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12 text-centered p-2">
+                                        <a class="p-2 pointer"
+                                            (click)="editScreen(editScreenTpl,{fields:[],items:[]},true)">
+                                            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                                            Add Screen
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ngb-tab>
+                </ngb-tabset>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<ng-template #editDatasetTpl let-c="close" let-d="dismiss">
+    <div #editDatasetForm="ngForm" ngForm>
+
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Dataset</h4>
+        </div>
+
+
+        <ngb-tabset class="tab-custom" justify="center">
+            <ngb-tab title="Basic Info">
+                <ng-template ngbTabContent>
+                    <div class="single-pane">
+                        <div class="form-group">
+                            <label>List Caption *</label>
+                            <input class="form-control" type="text" [(ngModel)]="editDatasetData.title" name="title"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-control" [(ngModel)]="editDatasetData.description"
+                                name="description"></textarea>
+                        </div>
+
+                        <div class="form-group" *ngIf="curForm.type=='db'">
+                            <label>List Type *</label>
+                            <div>
+                                <div class="btn-group btn-group-toggle" ngbRadioGroup name="type"
+                                    [(ngModel)]="editDatasetData && editDatasetData.type" required>
+                                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="all"> All</label>
+                                    <!-- <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="admin"> Admin</label> -->
+                                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="user"> User</label>
+                                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="action"> Action</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" *ngIf="curForm">
+                            <label>Included Fields ({{curForm.title}})</label>
+                            <ng-container *ngFor="let f of getSectionItems(curForm,['section','approval'])">
+                                <div class="custom-control custom-checkbox" *ngIf="curForm.items[f.code]"
+                                    [class.disabled]="curForm.items[f.code].type=='static'">
+                                    <input type="checkbox" class="custom-control-input" id="{{f.code}}"
+                                        value="{{f.code}}"
+                                        (click)="toggleItem(editDatasetData,'items',curForm.items[f.code],'data',curFormId)"
+                                        [checked]="checkItem(editDatasetData.items,curForm.items[f.code])"
+                                        [disabled]="curForm.items[f.code].type=='static'">
+                                    <label class="custom-control-label"
+                                        for="{{f.code}}">{{curForm.items[f.code].label}}</label>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <div class="form-group" *ngIf="prevForm">
+                            <label>Included Fields ({{prevForm.title}})</label>
+                            <ng-container *ngFor="let f of getSectionItems(prevForm,['section','approval'])">
+                                <div class="custom-control custom-checkbox" *ngIf="prevForm.items[f.code]"
+                                    [class.disabled]="prevForm.items[f.code].type=='static'">
+                                    <input type="checkbox" class="custom-control-input" id="{{f.code}}"
+                                        value="{{f.code}}"
+                                        (click)="toggleItem(editDatasetData,'items',prevForm.items[f.code],'prev',prevForm.id)"
+                                        [checked]="checkItem(editDatasetData.items,prevForm.items[f.code])"
+                                        [disabled]="prevForm.items[f.code].type=='static'">
+                                    <label class="custom-control-label"
+                                        for="{{f.code}}">{{prevForm.items[f.code].label}}</label>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <div class="form-group" *ngIf="curForm.type=='db'">
+                            <label>List entry with status</label>
+                            <div class="custom-control custom-checkbox">
+                                <input [(ngModel)]="editDatasetStatusList.drafted" class="custom-control-input"
+                                    name="drafted" id="drafted11" type="checkbox">
+                                <label class="custom-control-label" for="drafted11">Drafted</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input [(ngModel)]="editDatasetStatusList.submitted" class="custom-control-input"
+                                    name="submitted" id="submitted11" type="checkbox">
+                                <label class="custom-control-label" for="submitted11">Submitted</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input [(ngModel)]="editDatasetStatusList.resubmitted" class="custom-control-input"
+                                    name="resubmitted" id="resubmitted11" type="checkbox">
+                                <label class="custom-control-label" for="resubmitted11">Resubmitted</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input [(ngModel)]="editDatasetStatusList.approved" class="custom-control-input"
+                                    name="approved" id="approved11" type="checkbox">
+                                <label class="custom-control-label" for="approved11">Approved</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input [(ngModel)]="editDatasetStatusList.rejected" class="custom-control-input"
+                                    name="rejected" id="rejected11" type="checkbox">
+                                <label class="custom-control-label" for="rejected11">Rejected</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input [(ngModel)]="editDatasetStatusList.returned" class="custom-control-input"
+                                    name="returned" id="returned11" type="checkbox">
+                                <label class="custom-control-label" for="returned11">Returned</label>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </ng-template>
+            </ngb-tab>
+
+            <ngb-tab title="Options">
+                <ng-template ngbTabContent>
+                    <div class="single-pane">
+                        <div class="form-group">
+                            <label>Other Options</label>
+                            <div class="custom-control custom-checkbox">
+                                <input class="custom-control-input" type="checkbox" id="adminOnly"
+                                    [(ngModel)]="editDatasetData.adminOnly" name="adminOnly">
+                                <label class="custom-control-label" for="adminOnly">Admin-only access</label>
+                            </div>
+                            <div class="custom-control custom-checkbox" *ngIf="curForm.type=='db'">
+                                <input class="custom-control-input" type="checkbox" id="showStatus"
+                                    [(ngModel)]="editDatasetData.showStatus" name="showStatus">
+                                <label class="custom-control-label" for="showStatus">Show status</label>
+                            </div>
+
+                        </div>
+                        <div class="form-group" *ngIf="curForm.type=='db'">
+                            <label>Export</label>
+                            <div class="custom-control custom-checkbox">
+                                <input class="custom-control-input" type="checkbox"
+                                    [(ngModel)]="editDatasetData.exportXls" id="exportXls" name="exportXls">
+                                <label class="custom-control-label" for="exportXls">Export to Excel</label>
+                            </div>
+                        </div>
+                        <!-- <div class="form-group"> -->
+
+                        <!-- </div> -->
+                        <div class="form-group">
+                            <label>Action</label>
+                            <div class="custom-control custom-checkbox">
+                                <input class="custom-control-input" type="checkbox" id="showAction"
+                                    [(ngModel)]="editDatasetData.showAction" name="showAction">
+                                <label class="custom-control-label" for="showAction">Show action </label>
+                            </div>
+                            <div *ngIf="editDatasetData.showAction">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" type="checkbox"
+                                        [(ngModel)]="editDatasetData.canView" id="canView" name="canView">
+                                    <label class="custom-control-label" for="canView">View Entry </label>
+                                </div>
+                                <div class="custom-control custom-checkbox" *ngIf="curForm.type=='db'">
+                                    <input class="custom-control-input" type="checkbox"
+                                        [(ngModel)]="editDatasetData.canEdit" id="canEdit" name="canEdit">
+                                    <label class="custom-control-label" for="canEdit">Edit Entry </label>
+                                </div>
+                                <div class="custom-control custom-checkbox" *ngIf="curForm.type=='db'">
+                                    <input class="custom-control-input" type="checkbox"
+                                        [(ngModel)]="editDatasetData.canDelete" id="canDelete" name="canDelete">
+                                    <label class="custom-control-label" for="canDelete">Delete Entry </label>
+                                </div>
+                                <div class="custom-control custom-checkbox" *ngIf="curForm.type=='db'">
+                                    <input class="custom-control-input" type="checkbox"
+                                        [(ngModel)]="editDatasetData.canRetract" id="canRetract" name="canRetract">
+                                    <label class="custom-control-label" for="canRetract">Retract Entry </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Next Action</label>
+                            <ng-container *ngFor="let item of exceptCurForm()">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" type="checkbox" id="next_{{item.id}}"
+                                        [name]="item.id"
+                                        (click)="toggleNext(editDatasetData,'next',item.id, item.title)"
+                                        [checked]="checkNext(editDatasetData.next,item.id)">
+
+                                    <label class="custom-control-label" for="next_{{item.id}}">{{item.title}}</label>
+                                    <div class="input-group input-group-sm mt-1">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="label_{{item.id}}">Button Label</label>
+                                        </div>
+                                        <input type="text" class="form-control" name="label_{{item.id}}"
+                                            id="label_{{item.id}}" [(ngModel)]="editDatasetData.next[item.id]">
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-tab>
+
+            <ngb-tab title="Filters">
+                <ng-template ngbTabContent>
+                    <div class="single-pane">
+                        <div class="form-group" *ngIf="curForm">
+                            <label>Included Filters ({{curForm.title}})</label>
+                            <ng-container *ngFor="let f of getSectionItems(curForm,['section','approval'])">
+                                <div class="custom-control custom-checkbox" *ngIf="curForm.items[f.code]"
+                                    [class.disabled]="['static','file','imagePreview'].indexOf(curForm.items[f.code].type)>-1">
+                                    <input type="checkbox" class="custom-control-input" id="filter{{f.code}}"
+                                        value="{{f.code}}"
+                                        (click)="toggleItem(editDatasetData,'filters',curForm.items[f.code],'data',curFormId)"
+                                        [checked]="checkItem(editDatasetData.filters,curForm.items[f.code])"
+                                        [disabled]="curForm.items[f.code].type=='static'">
+                                    <label class="custom-control-label"
+                                        for="filter{{f.code}}">{{curForm.items[f.code].label}}</label>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <div class="form-group" *ngIf="prevForm">
+                            <label>Included Filters ({{prevForm.title}})</label>
+                            <ng-container *ngFor="let f of getSectionItems(prevForm,['section','approval'])">
+                                <div class="custom-control custom-checkbox" *ngIf="prevForm.items[f.code]"
+                                    [class.disabled]="['static','file','imagePreview'].indexOf(prevForm.items[f.code].type)>-1">
+                                    <input type="checkbox" class="custom-control-input" id="filter{{f.code}}"
+                                        value="{{f.code}}"
+                                        (click)="toggleItem(editDatasetData,'filters',prevForm.items[f.code],'prev',prevForm.id)"
+                                        [checked]="checkItem(editDatasetData.filters,prevForm.items[f.code])"
+                                        [disabled]="prevForm.items[f.code].type=='static'">
+                                    <label class="custom-control-label"
+                                        for="filter{{f.code}}">{{prevForm.items[f.code].label}}</label>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-tab>
+        </ngb-tabset>
+
+
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editDatasetForm.invalid"
+                (click)="c(editDatasetData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save List
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editDashboardTpl let-c="close" let-d="dismiss">
+    <div #editDashboardForm="ngForm" ngForm>
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Dashboard</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form-group">
+                <label class="control-label">Dashboard Name *</label>
+
+                <input type="text" class="form-control" [(ngModel)]="editDashboardData && editDashboardData.title"
+                    name="title" (ngModelChange)="editDashboardData.code=toSnakeCase(editDashboardData.title)"
+                    placeholder="ie: Admin Dashboard" required>
+
+            </div>
+            <div class="form-group">
+                <label class="control-label">Description</label>
+
+                <textarea class="form-control" [(ngModel)]="editDashboardData && editDashboardData.description"
+                    placeholder="ie: Statistical information for administrator" name="description"></textarea>
+
+            </div>
+            <div class="form-group">
+                <label class="control-label">Available for (optional; email, separated by comma)</label>
+
+                <input type="text" class="form-control" placeholder="ie: admin@gmail.com"
+                    [(ngModel)]="editDashboardData && editDashboardData.access" name="access">
+
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editDashboardForm.invalid"
+                (click)="c(editDashboardData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Dashboard
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #editChartTpl let-c="close" let-d="dismiss">
+    <div #editChartForm="ngForm" class="fix-gutter" ngForm>
+
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Chart</h4>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Chart Caption *</label>
+                <input class="form-control" type="text" [(ngModel)]="editChartData.title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea class="form-control" [(ngModel)]="editChartData.description" name="description"></textarea>
+            </div>
+
+            <p class="" *ngIf="editChartData.agg&&editChartData.fieldValue&&editChartData.fieldCode">
+                {{editChartData.agg}}(<strong>{{editChartData.fieldValue}}</strong>) by
+                <strong>{{editChartData.fieldCode}}</strong>
+            </p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Plottable Category *</label>
+
+                        <select class="form-control" name="fieldCode"
+                            [(ngModel)]="editChartData && editChartData.fieldCode" required>
+                            <option value="" disabled>Select field...</option>
+                            <optgroup *ngIf="prevForm" [label]="prevForm.title">
+                                <option *ngFor="let item of getSectionItems(prevForm,['section','approval'])"
+                                    [value]="'prev#' + item.code + (['select','radio'].indexOf(prevForm.items[item.code]?.type)>-1?'.name':'')">
+                                    {{prevForm.items[item.code]?.label}}
+                                </option>
+                            </optgroup>
+                            <optgroup *ngIf="curForm" [label]="curForm.title">
+                                <option *ngFor="let item of getSectionItems(curForm,['section','approval'])"
+                                    [value]="'data#' + item.code + (['select','radio'].indexOf(curForm.items[item.code]?.type)>-1?'.name':'')">
+                                    {{curForm.items[item.code]?.label}}
+                                </option>
+                            </optgroup>
+                        </select>
+
+                    </div>
+
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Plottable Value *</label>
+
+                        <select class="form-control" name="fieldValue"
+                            [(ngModel)]="editChartData && editChartData.fieldValue" required>
+                            <option value="" disabled>Select field...</option>
+                            <optgroup *ngIf="prevForm" [label]="prevForm.title">
+                                <option *ngFor="let item of getSectionItems(prevForm,['section','approval'])"
+                                    [value]="'prev#' + item.code + (['select','radio'].indexOf(prevForm.items[item.code]?.type)>-1?'.name':'')">
+                                    {{prevForm.items[item.code]?.label}}
+                                </option>
+                            </optgroup>
+                            <optgroup *ngIf="curForm" [label]="curForm.title">
+                                <option *ngFor="let item of getSectionItems(curForm,['section','approval'])"
+                                    [value]="'data#' + item.code + (['select','radio'].indexOf(curForm.items[item.code]?.type)>-1?'.name':'')">
+                                    {{curForm.items[item.code]?.label}}
+                                </option>
+                            </optgroup>
+                        </select>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Aggregate Type *</label>
+
+                        <select class="form-control" name="agg" [(ngModel)]="editChartData && editChartData.agg"
+                            required>
+                            <option value="" disabled>Select aggregate...</option>
+                            <option *ngFor="let item of aggType" [value]="item.code">{{item.name}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Width</label>
+
+                        <select class="form-control" name="size" [(ngModel)]="editChartData && editChartData.size">
+                            <option value="" disabled>Select width...</option>
+                            <option *ngFor="let item of sizeList" [value]="item.value">{{item.name}}</option>
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Height</label>
+
+                        <select class="form-control" name="height" [(ngModel)]="editChartData && editChartData.height">
+                            <option value="" disabled>Select height...</option>
+                            <option *ngFor="let item of heightList" [value]="item.value">{{item.name}}</option>
+                        </select>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label class="col-form-label">Chart Type *</label>
+                <div class="row">
+                    <div class="col" *ngFor="let type of chartTypeList">
+                        <div class="custom-control custom-radio nobreak">
+                            <input type="radio" class="custom-control-input" id="ct-{{type.code}}" name="layout"
+                                [(ngModel)]="editChartData.type" [value]="type.code" required>
+                            <label for="ct-{{type.code}}" class="custom-control-label"
+                                [class.text-primary]="editChartData.type==type.code">{{type.name}}
+                                <div class="ml-0 my-3">
+                                    <fa-icon [icon]="type.icon" size="4x" [fixedWidth]="true"></fa-icon>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="ml-auto col"></div>
+                </div>
+
+            </div>
+
+            <div class="form-group" *ngIf="curForm.type=='db'">
+                <label>Calculate entry with status</label>
+                <div class="custom-control custom-checkbox">
+                    <input [(ngModel)]="editChartStatusList.drafted" class="custom-control-input" name="drafted"
+                        id="drafted11" type="checkbox">
+                    <label class="custom-control-label" for="drafted11">Drafted</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input [(ngModel)]="editChartStatusList.submitted" class="custom-control-input" name="submitted"
+                        id="submitted11" type="checkbox">
+                    <label class="custom-control-label" for="submitted11">Submitted</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input [(ngModel)]="editChartStatusList.resubmitted" class="custom-control-input" name="resubmitted"
+                        id="resubmitted11" type="checkbox">
+                    <label class="custom-control-label" for="resubmitted11">Resubmitted</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input [(ngModel)]="editChartStatusList.approved" class="custom-control-input" name="approved"
+                        id="approved11" type="checkbox">
+                    <label class="custom-control-label" for="approved11">Approved</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input [(ngModel)]="editChartStatusList.rejected" class="custom-control-input" name="rejected"
+                        id="rejected11" type="checkbox">
+                    <label class="custom-control-label" for="rejected11">Rejected</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input [(ngModel)]="editChartStatusList.returned" class="custom-control-input" name="returned"
+                        id="returned11" type="checkbox">
+                    <label class="custom-control-label" for="returned11">Returned</label>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editChartForm.invalid"
+                (click)="c(editChartData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Chart
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editFormTpl let-c="close" let-d="dismiss">
+    <div #editFormForm="ngForm" ngForm>
+
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Form</h4>
+        </div>
+        <ngb-tabset class="tab-custom fix-gutter" justify="center">
+            <ngb-tab title="Overview">
+                <ng-template ngbTabContent>
+                    <div class="single-pane">
+                        <div class="form-group">
+                            <label class="control-label">Name *</label>
+
+                            <input type="text" class="form-control" [(ngModel)]="editFormData.title"
+                                placeholder="ie: Registration Form" name="title" required>
+
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Description</label>
+
+                            <textarea class="form-control" [(ngModel)]="editFormData.description"
+                                placeholder="ie: Online registration form for the app" name="description"></textarea>
+
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Admin (email, comma separated)</label>
+
+                            <input type="text" class="form-control" [(ngModel)]="editFormData.admin" name="admin">
+
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="publicAccess"
+                                    [(ngModel)]="editFormData.publicAccess" name="shared">
+                                <label class="custom-control-label" for="publicAccess">Public Access (Anonymous
+                                    Submission)</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Source Type *</label>
+
+                            <div>
+                                <div class="btn-group btn-group-toggle" ngbRadioGroup name="type"
+                                    [(ngModel)]="editFormData && editFormData.type" required>
+                                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="db"> DB Storage</label>
+                                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="rest"> RESTful Endpoint</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-tab>
+            <ngb-tab title="RESTful Setting" *ngIf="editFormData?.type=='rest'">
+                <ng-template ngbTabContent>
+
+                    <div class="single-pane">
+                        <h5>List</h5>
+                        <p>Endpoint that will be used to retrieve the list of data</p>
+                        <div class="form-group">
+                            <label class="control-label">Endpoint *</label>
+
+                            <input type="text" class="form-control"
+                                [(ngModel)]="editFormData && editFormData.rlEndpoint" name="rlEndpoint"
+                                placeholder="ie: https://research.unimas.my/api/research/list" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">Json Root</label>
+
+                                    <input type="text" class="form-control"
+                                        [(ngModel)]="editFormData && editFormData.rlRoot" name="rlRoot"
+                                        placeholder="ie: /content">
+
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">ID Field</label>
+
+                                    <input type="text" class="form-control"
+                                        [(ngModel)]="editFormData && editFormData.idField" name="idField"
+                                        placeholder="ie: /id">
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="control-label">Qualifier Selector</label>
+
+                            <input type="text" class="form-control form-control-sm"
+                                [(ngModel)]="editFormData && editFormData.rlQualifier" name="rlQualifier"
+                                placeholder="ie: /id, /projectId, /status/kod kodStatus">
+
+                        </div>
+
+
+                        <h5>Data</h5>
+                        <p>Endpoint that will be used to retrieve the single data</p>
+                        <div class="form-group">
+                            <label class="control-label">Endpoint *</label>
+
+                            <input type="text" class="form-control"
+                                [(ngModel)]="editFormData && editFormData.rdEndpoint" name="endpoint"
+                                placeholder="ie: https://research.unimas.my/api/research/{id}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Json Root</label>
+
+                            <input type="text" class="form-control" [(ngModel)]="editFormData && editFormData.rdRoot"
+                                name="rdRoot" placeholder="ie: /content">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Qualifier Selector</label>
+
+                            <input type="text" class="form-control form-control-sm"
+                                [(ngModel)]="editFormData && editFormData.rdQualifier" name="rdQualifier"
+                                placeholder="ie: /id, /projectId, /status/kod kodStatus">
+                        </div>
+
+                    </div>
+
+                </ng-template>
+            </ngb-tab>
+            <ngb-tab title="Options">
+                <ng-template ngbTabContent>
+                    <div class="single-pane fix-gutter">
+                        <div class="form-group">
+                            <label>Nav Type *</label>
+
+                            <div>
+                                <div class="btn-group btn-group-toggle" ngbRadioGroup name="nav"
+                                    [(ngModel)]="editFormData && editFormData.nav" required>
+                                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="simple"> Simple</label>
+                                    <label ngbButtonLabel class="btn btn-outline-secondary">
+                                        <input ngbButton type="radio" value="tabs"> Tabbed</label>
+                                    <label ngbButtonLabel class="btn btn-outline-secondary" disabled>
+                                        <input ngbButton type="radio" value="pills"> Accordion</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="custom-control custom-checkbox form-group">
+                            <input type="checkbox" class="custom-control-input" [(ngModel)]="editFormData.hideForm"
+                                name="hideForm" id="hideForm">
+                            <label class="custom-control-label" for="hideForm">Admin-only form</label>
+                        </div>
+                        <div class="form-group">
+                            <label>Previous Form</label>
+                            <select class="form-control" name="prev" [(ngModel)]="editFormData && editFormData.prev">
+                                <option [value]="null" style="color:gray">No Previous Form</option>
+                                <option *ngFor="let item of formList" [value]="item.id">{{item.title}}</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" *ngIf="editFormData?.type=='db'">
+                            <label class="control-label">Init Function</label>
+
+                            <textarea class="form-control" [(ngModel)]="editFormData.f"
+                                placeholder="ie: $http$('http://api.com/quote',callbackFn)" name="f"></textarea>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">Start Date</label>
+                                    <input class="form-control" type="text" name="startDate"
+                                        [(ngModel)]="editFormData.startDate" placeholder="Choose start date"
+                                        (focus)="d1.toggle()" ngbDatepicker #d1="ngbDatepicker">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">End Date</label>
+                                    <input class="form-control" type="text" name="endDate"
+                                        [(ngModel)]="editFormData.endDate" placeholder="Choose end date"
+                                        (focus)="d2.toggle()" ngbDatepicker #d2="ngbDatepicker">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-tab>
+        </ngb-tabset>
+
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editFormForm.invalid"
+                (click)="c(editFormData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Form
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editSectionTpl let-c="close" let-d="dismiss">
+    <div #editSectionForm="ngForm" ngForm>
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Section</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form-group">
+                <label class="control-label">Section Name *</label>
+
+                <input type="text" class="form-control" [(ngModel)]="editSectionData && editSectionData.title"
+                    name="title" (ngModelChange)="editSectionData.code=toSnakeCase(editSectionData.title)" required>
+                <div class="mt-1 custom-control custom-checkbox">
+
+                    <input type="checkbox" class="custom-control-input" id="main"
+                        [(ngModel)]="editSectionData && editSectionData.main" name="main">
+                    <label class="custom-control-label" for="main"> Mark as Main Section </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Description</label>
+
+                <textarea class="form-control" [(ngModel)]="editSectionData && editSectionData.description"
+                    name="description"></textarea>
+
+            </div>
+            <div class="form-group">
+                <label>Type</label>
+
+                <div>
+                    <div class="btn-group btn-group-toggle" ngbRadioGroup name="type"
+                        [(ngModel)]="editSectionData && editSectionData.type">
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="section"> Section</label>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="list"> Child</label>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="approval"> Approval</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6" *ngIf="editSectionData?.type=='list'">
+                    <div class="form-group">
+                        <label class="control-label">Section Key *</label>
+
+                        <input type="text" class="form-control" [(ngModel)]="editSectionData && editSectionData.code"
+                            name="code" disabled required>
+
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Panel Width</label>
+
+                        <select class="form-control" name="size" [(ngModel)]="editSectionData && editSectionData.size">
+                            <option value="" disabled>Select width...</option>
+                            <option *ngFor="let item of sizeList" [value]="item.value">{{item.name}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" *ngIf="curForm.type=='db'">
+                <label class="control-label">Pre-requisite</label>
+
+                <input type="text" class="form-control" [(ngModel)]="editSectionData && editSectionData.pre" name="pre"
+                    placeholder="Expression (ie: $.age > 18)">
+            </div>
+            <div class="form-group" *ngIf="['tabs','accordions','pills'].indexOf(curForm.nav)>-1">
+                <label>Parent</label>
+                <select class="form-control" name="parent" [(ngModel)]="editSectionData && editSectionData.parent">
+                    <option value="" disabled>Select parent...</option>
+                    <option value="{{p.id}}" *ngFor="let p of curForm.tabs">{{p.title}}</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editSectionForm.invalid"
+                (click)="c(editSectionData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Section
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editTabTpl let-c="close" let-d="dismiss">
+    <div #editTabForm="ngForm" ngForm>
+
+
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Tab</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form-group">
+                <label class="control-label">Tab Name *</label>
+
+                <input type="text" class="form-control" [(ngModel)]="editTabData && editTabData.title" name="title"
+                    (ngModelChange)="editTabData.code=toSnakeCase(editTabData.title)" required>
+
+            </div>
+            <div class="form-group">
+                <label class="control-label">Pre-requisite</label>
+
+                <input type="text" class="form-control" [(ngModel)]="editTabData && editTabData.pre" name="pre"
+                    placeholder="Expression (ie: $.age > 18)">
+            </div>
+
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editTabForm.invalid"
+                (click)="c(editTabData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Tab
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editTierTpl let-c="close" let-d="dismiss">
+    <form #editTierForm="ngForm">
+
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Tier</h4>
+        </div>
+        <div class="modal-body fix-gutter">
+            <div class="form-group">
+                <label>Tier Name *</label>
+                <input class="form-control" type="text" [(ngModel)]="editTierData.name" name="name"
+                    placeholder="Tier name (ie: PTJ Approval)" required>
+            </div>
+            <div class="input-group input-group-sm form-group">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="submitMailer">Submission Mailer</label>
+                </div>
+                <select class="form-control custom-select" id="submitMailer" name="submitMailer"
+                    [(ngModel)]="editTierData && editTierData.submitMailer">
+                    <option [value]="null" style="color:gray">No Mailer</option>
+                    <option *ngFor="let item of mailerList" [value]="item.id">{{item.name}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Approval Type *</label>
+                <div>
+                    <div class="btn-group btn-group-toggle" ngbRadioGroup name="type" [(ngModel)]="editTierData.type"
+                        required>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="ALL"> All</label>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="DYNAMIC"> Dynamic</label>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="FIXED"> Fixed</label>
+                        <label ngbButtonLabel class="btn btn-outline-secondary">
+                            <input ngbButton type="radio" value="ASSIGN"> Assign</label>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="editTierData.type=='DYNAMIC'">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>OrgMap Endpoint *</label>
+                            <input type="text" class="form-control" name="orgMap" [(ngModel)]="editTierData.orgMap"
+                                required>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Pointer to email *</label>
+                            <input type="text" class="form-control" name="orgMapPointer"
+                                [(ngModel)]="editTierData.orgMapPointer" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="editTierData.type=='FIXED'">
+                <div class="form-group">
+                    <label>Approver email (comma separated) *</label>
+                    <input type="text" class="form-control" name="tierPerson" [(ngModel)]="editTierData.approver"
+                        required />
+                </div>
+            </div>
+
+            <div *ngIf="editTierData.type=='ASSIGN'" class="input-group input-group-sm mb-2">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="assignMailer">Assign Mailer</label>
+                    </div>
+                    <select class="form-control custom-select" id="assignMailer" name="assignMailer"
+                        [(ngModel)]="editTierData && editTierData.assignMailer">
+                        <option [value]="null" style="color:gray">No Mailer</option>
+                        <option *ngFor="let item of mailerList" [value]="item.id">{{item.name}}</option>
+                    </select>
+                </div>
+
+            <div class="custom-control custom-checkbox form-group">
+                <input type="checkbox" class="custom-control-input" [(ngModel)]="editTierData.showApprover"
+                    name="showApprover" id="showApprover">
+                <label class="custom-control-label" for="showApprover">Show approver email in approval form
+                    panel</label>
+            </div>
+
+            <div class="custom-control custom-checkbox form-group">
+                <input type="checkbox" class="custom-control-input" [(ngModel)]="editTierData.alwaysApprove"
+                    name="alwaysApprove" id="alwaysApprove">
+                <label class="custom-control-label" for="alwaysApprove">Always approve decision - decision option will
+                    be hidden, move to the next tier</label>
+            </div>
+
+            <div [class.disabled-region]="editTierData.alwaysApprove">
+                <label>Allowed Tier Action</label>
+
+                <div class="custom-control custom-checkbox form-group">
+                    <input type="checkbox" class="custom-control-input" [(ngModel)]="editTierData.canRemark"
+                        name="canRemark" id="canRemark">
+                    <label for="canRemark" class="custom-control-label">Enable Remark - Allow user to add decision
+                        remark</label>
+                </div>
+                <div class="custom-control custom-checkbox form-group">
+                    <input type="checkbox" class="custom-control-input" [(ngModel)]="editTierData.canApprove"
+                        name="canApprove" id="canApprove">
+                    <label for="canApprove" class="custom-control-label">Approve - Decision recorded, move to the next
+                        tier</label>
+
+                    <div class="input-group input-group-sm mt-1" *ngIf="editTierData.canApprove">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="approveMailer">Mailer</label>
+                        </div>
+                        <select class="form-control custom-select" id="approveMailer" name="approveMailer"
+                            [(ngModel)]="editTierData && editTierData.approveMailer">
+                            <option [value]="null" style="color:gray">No Mailer</option>
+                            <option *ngFor="let item of mailerList" [value]="item.id">{{item.name}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="custom-control custom-checkbox form-group">
+                    <input type="checkbox" class="custom-control-input" [(ngModel)]="editTierData.canReject"
+                        name="canReject" id="canReject">
+                    <label for="canReject" class="custom-control-label">Reject - Decision recorded, end process</label>
+                    <div class="input-group input-group-sm mt-1" *ngIf="editTierData.canReject">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="rejectMailer">Mailer</label>
+                        </div>
+                        <select class="form-control custom-select" id="rejectMailer" name="rejectMailer"
+                            [(ngModel)]="editTierData && editTierData.rejectMailer">
+                            <option [value]="null" style="color:gray">No Mailer</option>
+                            <option *ngFor="let item of mailerList" [value]="item.id">{{item.name}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="custom-control custom-checkbox form-group">
+                    <input type="checkbox" class="custom-control-input" [(ngModel)]="editTierData.canReturn"
+                        name="canReturn" id="canReturn">
+                    <label for="canReturn" class="custom-control-label">Return - Return to user for revision</label>
+                    <div class="input-group input-group-sm mt-1" *ngIf="editTierData.canReturn">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="returnMailer">Mailer</label>
+                        </div>
+                        <select class="form-control custom-select" id="returnMailer" name="returnMailer"
+                            [(ngModel)]="editTierData && editTierData.returnMailer">
+                            <option [value]="null" style="color:gray">No Mailer</option>
+                            <option *ngFor="let item of mailerList" [value]="item.id">{{item.name}}</option>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-sm mt-1" *ngIf="editTierData.canReturn">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="resubmitMailer">Resubmit Mailer</label>
+                        </div>
+                        <select class="form-control custom-select" id="resubmitMailer" name="resubmitMailer"
+                            [(ngModel)]="editTierData && editTierData.resubmitMailer">
+                            <option [value]="null" style="color:gray">No Mailer</option>
+                            <option *ngFor="let item of mailerList" [value]="item.id">{{item.name}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="custom-control custom-checkbox form-group">
+                    <input type="checkbox" class="custom-control-input" [(ngModel)]="editTierData.canSkip"
+                        name="canSkip" id="canSkip">
+                    <label for="canSkip" class="custom-control-label">Skip - Decision unrecorded, move to next
+                        tier</label>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label>Custom Approval Form</label>
+                <ng-select [items]="curForm.sections" bindLabel="title" [(ngModel)]="editTierData.section"
+                    #customForm="ngModel" [required]="editTierData.alwaysApprove" name="customForm">
+                </ng-select>
+                <small class="has-error" *ngIf="customForm.invalid">
+                    <span class="form-text" *ngIf="customForm.errors.required">Custom form is required for Always
+                        Approved Option!</span>
+                </small>
+            </div>
+
+
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editTierForm.invalid"
+                (click)="c(editTierData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Tier
+            </button>
+        </div>
+    </form>
+</ng-template>
+
+<ng-template #editItemTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Form Item</h4>
+    </div>
+    <div #editItemForm="ngForm" ngForm>
+        <ngb-tabset justify="center" class="tab-custom fix-gutter">
+            <ngb-tab title="Field Setting">
+                <ng-template ngbTabContent>
+                    <div class="single-pane">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Label *</label>
+
+                                    <input type="text" class="form-control" [(ngModel)]="editItemData.label"
+                                        name="label"
+                                        (ngModelChange)="editItemData.id||editItemData.code=toSnakeCase(editItemData.label)"
+                                        placeholder="ie: First name" required>
+                                    <div class="custom-control custom-checkbox mt-1">
+                                        <input type="checkbox" class="custom-control-input" id="sup_label"
+                                            [(ngModel)]="editItemData.hideLabel" name="hideLabel">
+                                        <label for="sup_label" class="custom-control-label">Hide Label</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox mt-1" *ngIf="curForm.type=='db'">
+                                        <input type="checkbox" class="custom-control-input" id="readOnly"
+                                            [(ngModel)]="editItemData.readOnly" name="readOnly">
+                                        <label for="readOnly" class="custom-control-label">Read Only</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+
+                                <div class="form-group" *ngIf="curForm.type=='rest'">
+                                    <label class="control-label">Code *</label>
+                                    <select class="form-control" name="code" [(ngModel)]="editItemData.code" required>
+                                        <option *ngFor="let c of curFormColumns" [value]="c">{{c}}</option>
+                                    </select>
+                                    <small class="text-danger blink_me" *ngIf="itemExist(editItemData)">Code
+                                        already used! Please edit</small>
+                                </div>
+
+                                <div class="form-group" *ngIf="curForm.type=='db'" [class.element]="!editCode">
+                                    <label class="control-label">Code *</label>
+
+                                    <input type="text" class="form-control element-item" [(ngModel)]="editItemData.code"
+                                        name="code" placeholder="ie: firstName" [readonly]="!editCode" required>
+                                    <button class="btn btn-secondary btn-round btn-sm element-edit"
+                                        style="position:absolute;top:10px;right:10px;" *ngIf="!editCode"
+                                        (click)="editCode=true">
+                                        <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                                    </button>
+                                    <button class="btn btn-secondary btn-round btn-sm element-edit"
+                                        style="position:absolute;top:10px;right:10px;" *ngIf="editCode"
+                                        (click)="editCode=false">
+                                        <fa-icon [icon]="['fas','check']" [fixedWidth]="true"></fa-icon>
+                                    </button>
+                                    <small class="text-danger blink_me" *ngIf="itemExist(editItemData)">Code
+                                        already used! Please edit</small>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Type *</label>
+
+                                    <select class="form-control" name="type"
+                                        [(ngModel)]="editItemData && editItemData.type"
+                                        (ngModelChange)="editItemData.subType=null" required>
+                                        <option value="" disabled>Select type...</option>
+                                        <option *ngFor="let item of filterItem(typeList, curForm.type)"
+                                            [value]="item.value">{{item.name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Element Width</label>
+
+                                    <select class="form-control" name="size"
+                                        [(ngModel)]="editItemData && editItemData.size">
+                                        <option value="" disabled>Select type...</option>
+                                        <option *ngFor="let item of sizeList" [value]="item.value">{{item.name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" *ngIf="['select','radio','btn-radio'].indexOf(editItemData.type)>-1">
+                            <label>List Source</label>
+
+                            <select class="form-control" name="dataSource"
+                                [(ngModel)]="editItemData && editItemData.dataSource">
+                                <option value="" disabled>Select lookup...</option>
+                                <option *ngFor="let item of lookupList" [value]="item.id">{{item.name}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group" *ngIf="['select','radio','btn-radio'].indexOf(editItemData.type)>-1">
+                            <label>Source Initial Parameter</label>
+                            <textarea class="form-control" name="dataSourceInit"
+                                [(ngModel)]="editItemData && editItemData.dataSourceInit"
+                                placeholder="ie: {extra:'base'}"></textarea>
+                        </div>
+
+                        <div class="form-group" *ngIf="subType[editItemData.type]">
+                            <label>Sub Type *</label>
+                            <div>
+                                <div class="btn-group btn-group-toggle" ngbRadioGroup name="subType"
+                                    [(ngModel)]="editItemData.subType" [required]="!editItemData.subType">
+                                    <label ngbButtonLabel class="btn btn-outline-secondary btn-sm"
+                                        *ngFor="let st of subType[editItemData.type]">
+                                        <input ngbButton type="radio" [value]="st.code">{{st.name}}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" *ngIf="curForm.type=='db' 
+                        && ['qr','clearfix'].indexOf(editItemData.subType)==-1
+                        && ['imagePreview','scaleTo5','scaleTo10','radio'].indexOf(editItemData.type)==-1">
+                            <label class="control-label">Placeholder</label>
+
+                            <textarea class="form-control" [(ngModel)]="editItemData.placeholder" name="placeholder"
+                                placeholder="Input placeholder"></textarea>
+
+                        </div>
+
+                        <div class="form-group" *ngIf="editItemData.type=='eval'">
+                            <label class="control-label">Expression *</label>
+
+                            <textarea class="form-control" [(ngModel)]="editItemData.f" name="f"
+                                placeholder="Expression statement" required></textarea>
+                            <small class="help-block" *ngIf="editItemData.type=='eval'">
+                                <fa-icon [icon]="['fas','info-circle']" [fixedWidth]="true"></fa-icon>
+                                You can use the following expresion:
+                                <ul>
+                                    <li>Date : any Date function (ie: Date.now())</li>
+                                    <li>*/+- : basic arithmetic operator (ie: $.total - $.used)</li>
+                                    <li>$.field : for field value (ie: $.first_name)</li>
+                                    <li>$user$.email : for user value</li>
+                                    <li>Math : any Math function (ie: Math.round($.total))</li>
+                                    <li>Any string function (ie: $.first_name.replace('will','tony'))</li>
+                                </ul>
+                            </small>
+                        </div>
+                        <div class="custom-control custom-checkbox" *ngIf="editItemData.type=='eval'">
+
+                            <input class="custom-control-input" type="checkbox" id="hidden"
+                                [(ngModel)]="editItemData.hidden" name="hidden">
+                            <label class="custom-control-label" for="hidden">Hide field?</label>
+                        </div>
+                    </div>
+
+                </ng-template>
+            </ngb-tab>
+            <ngb-tab title="Validation" *ngIf="curForm.type=='db'">
+                <ng-template ngbTabContent>
+                    <div class="single-pane">
+                        <div class="form-group">
+
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="field-required"
+                                    [(ngModel)]="editItemData.v && editItemData.v.required" name="required">
+                                <label class="custom-control-label" for="field-required"> Required?</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group" *ngIf="['text','textarea'].indexOf(editItemData.type)>-1">
+                                    <label>Minlength</label>
+                                    <input type="number" class="form-control"
+                                        [(ngModel)]="editItemData.v && editItemData.v.minlength" name="minlength">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group" *ngIf="['text','textarea'].indexOf(editItemData.type)>-1">
+                                    <label>Maxlength</label>
+                                    <input type="number" class="form-control"
+                                        [(ngModel)]="editItemData.v && editItemData.v.maxlength" name="maxlength">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group" *ngIf="['text','textarea'].indexOf(editItemData.type)>-1">
+                            <label>Pattern</label>
+                            <input type="text" class="form-control"
+                                [(ngModel)]="editItemData.v && editItemData.v.pattern" name="pattern">
+                        </div>
+
+                        <div class="row" *ngIf="editItemData.type=='number'">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Min</label>
+                                    <input type="number" class="form-control"
+                                        [(ngModel)]="editItemData.v && editItemData.v.min" name="min">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Max</label>
+                                    <input type="number" class="form-control"
+                                        [(ngModel)]="editItemData.v && editItemData.v.max" name="max">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-tab>
+            <ngb-tab title="Options" *ngIf="curForm.type=='db'">
+                <ng-template ngbTabContent>
+                    <div class="single-pane">
+                        <div class="form-group">
+                            <label class="control-label">Hint</label>
+
+                            <textarea class="form-control" [(ngModel)]="editItemData.hint" name="hint"
+                                placeholder="Hint for input"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Pre-requisite</label>
+
+                            <input type="text" class="form-control" [(ngModel)]="editItemData.pre" name="pre"
+                                placeholder="Expression (ie: $.age > 18)">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Post-action</label>
+
+                            <textarea class="form-control" [(ngModel)]="editItemData.post" name="post"
+                                placeholder="Statement (ie: $lookup$('field_code',{type:$.lookup1}))"></textarea>
+                            <small class="help-block">
+                                <fa-icon [icon]="['fas','info-circle']" [fixedWidth]="true"></fa-icon>
+                                You can use the following statement:
+                                <ul>
+                                    <li>Value reassignment: $.field = 'newValue'</li>
+                                    <li>Added undeclared value: $.aux_field = $.field</li>
+                                    <li>Lookup refresh: $lookup$(field_code,parameters)</li>
+                                    <li>Http request: $http$(url,callback) ie:
+                                        $http$('http://api.com/quote',callbackFn)</li>
+                                </ul>
+                            </small>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-tab>
+        </ngb-tabset>
+
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary"
+            [disabled]="editItemForm.invalid || itemExist(editItemData)" (click)="c(editItemData)">
+            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+            Save Item
+        </button>
+    </div>
+    <!-- </div> -->
+</ng-template>
+
+<ng-template #editScreenTpl let-c="close" let-d="dismiss">
+    <div #editScreenForm="ngForm" ngForm>
+
+
+        <div class="modal-header">
+            <h4 class="modal-title">Edit Screen</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form-group">
+                <label class="control-label">Title</label>
+
+                <input type="text" class="form-control" [(ngModel)]="editScreenData && editScreenData.title"
+                    name="title" required>
+
+            </div>
+            <div class="form-group">
+                <label class="control-label">Description</label>
+
+                <textarea class="form-control" [(ngModel)]="editScreenData && editScreenData.description"
+                    name="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="col-form-label">Screen Type</label>
+                <div class="row">
+                    <div class="col">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" id="type-qr" name="type"
+                                [(ngModel)]="editScreenData.type" value="qr" required>
+                            <label for="type-qr" class="custom-control-label">QR Scanner
+                                <!-- <div><small>App is only accessible via URL</small></div> -->
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" id="type-search" name="type"
+                                [(ngModel)]="editScreenData.type" value="search" required>
+                            <label for="type-search" class="custom-control-label">Search Page
+                                <!-- <div><small>App available in Marketplace</small></div> -->
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" id="type-list" name="type"
+                                [(ngModel)]="editScreenData.type" value="list" required>
+                            <label for="type-list" class="custom-control-label">List
+                                <!-- <div><small>App only available as template</small></div> -->
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group fix-gutter">
+                <label class="control-label">Next</label>
+
+                <div class="row" *ngFor="let a of editScreenData.actions; let i=index">
+                    <!-- {{ac|json}} -->
+                    <div class="col-md-4">
+                        <!-- {{a.label}} -->
+                        <input type="text" class="form-control" [(ngModel)]="a.label" name="label_i{{i}}">
+                    </div>
+                    <div class="col-md-4">
+                        <!-- {{a.nextType}} -->
+                        <select class="form-control" name="nextType_i{{i}}" [(ngModel)]="a.nextType" required>
+                            <option value="" disabled>Select action...</option>
+                            <option value="edit">Edit Current</option>
+                            <option value="prev">Edit Next</option>
+                            <option value="view">View</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <!-- {{a.next}} -->
+                        <select class="form-control" name="next_i{{i}}" [(ngModel)]="a.next" required>
+                            <option value="" disabled>Select action...</option>
+                            <option *ngFor="let item of formList" [value]="item.id">{{item.title}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" [(ngModel)]="label" name="label" required>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-control" name="nextType" [(ngModel)]="nextType" required>
+                            <option value="" disabled>Select action...</option>
+                            <option value="edit">Edit Current</option>
+                            <option value="next">Edit Next</option>
+                            <option value="view">View</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-control" name="next" [(ngModel)]="next" required>
+                            <option value="" disabled>Select action...</option>
+                            <option *ngFor="let item of formList" [value]="item.id">{{item.title}}</option>
+                        </select>
+                    </div>
+                </div>
+                <button (click)="addScreenAction(editScreenData, {label:label,nextType:nextType,next:next})">Add
+                    Action</button>
+
+            </div>
+            <!-- <div class="form-group">
+                    <label class="control-label">Next Model</label>
+    
+                    
+            </div> -->
+
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" [disabled]="editScreenForm.invalid"
+                (click)="c(editScreenData)">
+                <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+                Save Screen
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #removeItemTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Form Item</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this item?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Item Label</label>
+
+                <p class="form-control-static">
+                    {{curForm.items[removeItemData.code]?curForm.items[removeItemData.code].label:removeItemData.code}}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeItemData)">
+            Remove Item
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeScreenTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Screen</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this screen?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Screen Title</label>
+
+                <p class="form-control-static">
+                    {{removeScreenData.title}}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeScreenData)">
+            Remove Screen
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeSectionTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Section</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this section?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Section Title</label>
+                <p class="form-control-static">{{removeSectionData.title}}</p>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Description</label>
+                <p class="form-control-static">{{removeSectionData.description}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeSectionData)">
+            Remove Section
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeTabTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Tab</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this tab?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Tab Title</label>
+                <p class="form-control-static">{{removeTabData.title}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeTabData)">
+            Remove Tab
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeDashboardTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Dashboard</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this dashboard?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Dashboard Title</label>
+                <p class="form-control-static">{{removeDashboardData.title}}</p>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Description</label>
+                <p class="form-control-static">{{removeDashboardData.description}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeDashboardData)">
+            Remove Dashboard
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeFormTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Form</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this form?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Form Title</label>
+                <p class="form-control-static">{{removeFormData.title}}</p>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Form Description</label>
+                <p class="form-control-static">{{removeFormData.description}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeFormData)">
+            Remove Category
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeDatasetTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove List</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this data list?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Data List Title</label>
+
+                <p class="form-control-static">{{removeDatasetData.title}}</p>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Data List Description</label>
+
+                <p class="form-control-static">{{removeDatasetData.description}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeDatasetData)">
+            Remove Data List
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeTierTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Approval Tier</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this approval tier?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Tier Name</label>
+
+                <p class="form-control-static">{{removeTierData.name}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeTierData)">
+            Remove Tier
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #removeChartTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Remove Chart</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Are you sure you want to remove this Chart?
+        </p>
+
+        <div class="form">
+            <div class="form-group">
+                <label class="control-label">Chart Caption</label>
+
+                <p class="form-control-static">{{removeChartData.title}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" (click)="c(removeChartData)">
+            Remove Chart
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #viewItemsTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Manage Form Item Source</h4>
+    </div>
+    <div class="list-group list-group-flush">
+
+        <div class="list-group-item element" *ngFor="let f of curForm.items|keyvalue">
+            <span class="element-item"> {{f.value.label}} - {{f.value.code}}</span>
+            <div class="element-edit" style="position:absolute;top:3px;right:3px; padding:3px">
+                <button class="btn btn-round btn-sm btn-info" (click)="removeItemSource(curForm.id,f.value.id)">
+                    <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                </button>
+
+            </div>
+        </div>
+        <h5 class="text-muted p-3" *ngIf="!curForm.items">Source Item Not Available</h5>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+    </div>
+</ng-template>
+
+<ng-template #crListTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">App Copy Request</h4>
+    </div>
+    <div class="list-group list-group-flush">
+
+        <div class="list-group-item element" *ngFor="let cr of copyRequestList">
+            <span class="element-item"> {{cr.email}} - {{cr.status}}</span>
+            <div class="element-edit" style="position:absolute;top:3px;right:3px; padding:3px">
+                <button class="btn btn-round btn-sm btn-info" (click)="activateCp(cr.id,'activate')">
+                    <fa-icon [icon]="['fas','check']" [fixedWidth]="true"></fa-icon>
+                </button>
+                <button class="btn btn-round btn-sm btn-danger" (click)="activateCp(cr.id,'reject')">
+                    <fa-icon [icon]="['fas','times']" [fixedWidth]="true"></fa-icon>
+                </button>
+
+            </div>
+        </div>
+        <h5 class="text-muted p-3" *ngIf="copyRequestList==0">No copy request at the moment</h5>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+    </div>
+</ng-template>

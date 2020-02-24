@@ -1,0 +1,62 @@
+.group-list {
+    color: white;
+}
+.group-list .list-group-item-text{
+    font-size:13px !important;
+}
+.group-list a {
+    color: white;
+    text-decoration: none;
+    padding: .5rem 1rem;
+    display: block;
+    position: relative;
+}
+
+.group-list a.active::after {
+    content: '';
+    position: absolute;
+    right: 0px;
+    top: 25%;
+    width: 5px;
+    height: 50%;
+    background: #fff;
+}
+
+.group-list .group-heading {
+    font-size: .875rem;
+    color: rgba(255, 255, 255, .7);
+    text-transform: uppercase;
+    padding: .5rem 1rem;
+    margin-bottom: 0px;
+}
+.wrapper {
+    height: 100%;
+}
+
+.sidebar {
+    color: white;
+    background: rgb(7, 71, 166);
+    flex: 1;
+}
+
+.content {
+    flex: 1;
+    padding: 0px;
+
+}
+
+@media screen and (min-width: 640px) {
+    .wrapper {
+        display: flex;
+    }
+
+    .sidebar {
+        max-width: 250px;
+        overflow: auto;
+    }
+
+    .content {
+        height: 100%;
+        overflow: auto;
+    }
+}

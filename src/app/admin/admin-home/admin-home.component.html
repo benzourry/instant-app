@@ -1,0 +1,58 @@
+<div class="wrapper">
+    <div class="limit-width centered">
+        <div class="repo-title text-centered p-3 pt-0">
+
+            <h4>Configuration</h4>
+            <div>Click on the tile to open configuration</div>
+        </div>
+        <div class="repo-tool text-centered">
+            <div class="tool-container" style="max-width:480px;margin:auto">
+
+                <input type="search" class="rounded" placeholder="Filter list" [value]="searchText">
+
+            </div>
+        </div>
+        <div class="repo-item">
+            <div class="p-4 text-muted text-centered" *ngIf="itemLoading">
+                <div class="lds-ellipsis">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <div class="p-4 text-muted text-centered" *ngIf="itemList.length == 0">
+                <h1>:(</h1>
+                <h4>No setting available</h4>
+            </div>
+            <div class="tile-wrap" *ngIf="itemList.length > 0">
+
+                <div class="tile" *ngFor="let item of itemList | filter:searchText" style="text-overflow: ellipsis" [class.disabled]="item.disabled">
+                    <div class="tile-mid">
+                        <div class="tile-content text-center ">
+                            <h6 class="list-group-item-heading">{{item?.title}}
+                            </h6>
+                            <div class="p-3 text-info">
+                                <fa-icon [icon]="item?.icon" size="3x" [fixedWidth]="true"></fa-icon>
+                            </div>
+                            <p class="desc">{{item?.description}}</p>
+                        </div>
+
+                        <div class="tile-action">
+                            <a class="btn btn-round btn-success stack" [routerLink]="item?.url">
+                                <fa-icon [icon]="item?.icon" [fixedWidth]="true"></fa-icon>
+                                Open
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="itemList?.length>pageSize" class="text-centered">
+                <ngb-pagination [collectionSize]="draftTotal" [pageSize]="pageSize" [(page)]="draftPageNumber" size="sm"
+                    [maxSize]="10" (pageChange)="getItemList(pageNumber)" boundaryLinks="true" directionLinks="false"></ngb-pagination>
+            </div>
+        </div>
+    </div>
+
+</div>

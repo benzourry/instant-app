@@ -1,0 +1,242 @@
+<style>
+    input[type=search].start {
+        background: rgba(255, 255, 255, .7) url(assets/img/search-icon.png) no-repeat 9px center;
+        border: none;
+        /* solid 2px #333; */
+        padding: 6px 10px 6px 32px;
+        vertical-align: middle;
+        /*-webkit-border-radius: 10em;*/
+        /*-moz-border-radius: 10em;*/
+        border-radius: 10em;
+        color: black;
+        max-width: 100%;
+    }
+
+    input[type=search].start:focus {
+        /*background-color: #fff;*/
+        border-color: #0078d7;
+        outline: none;
+        -webkit-box-shadow: 0 0 5px rgba(109, 207, 246, .5);
+        -moz-box-shadow: 0 0 5px rgba(109, 207, 246, .5);
+        box-shadow: 0 0 5px rgba(109, 207, 246, .5);
+    }
+</style>
+
+
+<div class="wrapper">
+    <div class="sidebar">
+        <div class="p-3">
+            <h4 class="mb-3">Mailer Manager</h4>
+            <input type="search" class="start" placeholder="Filter list" (keypress.enter)="loadMailerList(1)" [(ngModel)]="searchText">
+        </div>
+        <div class="group-list">
+                <div class="p-3 text-centered" *ngIf="itemLoading">
+                        <div class="lds-ellipsis white"><div></div><div></div><div></div><div></div></div>
+                    </div>
+            <div class="mb-3" *ngIf="!itemLoading">
+                <a class="pointer" (click)="loadMailer(a?.id)" [routerLink]="['/admin/mailer']" [queryParams]="{id:a?.id}" [class.active]="a.id==mailerId"
+                    *ngFor="let a of mailerList | filter:searchText">
+                    <div class="list-group-item-heading">
+                        {{a.name}}
+                    </div>
+                    <div class="list-group-item-text" *ngIf="a.description">{{a.description}}</div>
+                </a>
+                <a class="pointer" (click)="editMailer(editMailerTpl,{}, true)" [class.disabled]="offline">
+                    <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+
+                    Create Mailer</a>
+
+                <div class="p-2">
+                    <ngb-pagination *ngIf="mailerTotal>itemsPerPage" [collectionSize]="mailerTotal" [pageSize]="itemsPerPage"
+                        [(page)]="pageNumber" [maxSize]="5" (pageChange)="loadMailerList(pageNumber)" [boundaryLinks]="false"
+                        [directionLinks]="false"></ngb-pagination>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="content">
+        <div class="limit-width fix-gutter">
+            <div class="single-pane">
+                <div *ngIf="mailer">
+                    <div class="text-center">
+                        <h3>{{mailer.name}}</h3>
+                        <p class="mb-1" *ngIf="mailer.description">{{mailer.description}}</p>
+                        <p *ngIf="mailer.shared" class="mb-2">
+                            <fa-icon [icon]="['fas','globe']" [fixedWidth]="true"></fa-icon>
+                            Public Mailer</p>
+                        <p *ngIf="!mailer.shared" class="text-danger mb-2">
+                            <fa-icon [icon]="['fas','lock']" [fixedWidth]="true"></fa-icon>
+                            Private Mailer</p>
+
+                        <div *ngIf="mailer">
+                            <button class="btn btn-round btn-secondary" (click)="editMailer(editMailerTpl,mailer)" [class.disabled]="offline">
+                                <fa-icon [icon]="['fas','pencil-alt']" [fixedWidth]="true"></fa-icon>
+                            </button>
+                            <button class="btn btn-round btn-secondary mr-1 ml-1" (click)="removeMailer(removeMailerTpl,mailer)" [class.disabled]="offline">
+                                <fa-icon [icon]="['fas','trash']" [fixedWidth]="true"></fa-icon>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="p-4 text-centered" *ngIf="loading">
+                        <div class="lds-ellipsis">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4" *ngIf="!loading">
+                        <div class="card-header">
+                            <span [ngClass]="mailer.enabled==0?'text-danger':'text-success'"><fa-icon [icon]="['fas','circle']" [fixedWidth]="true"></fa-icon></span>
+                            {{mailer.subject}}
+                        </div>
+                        <div class="card-body" [innerHtml]="nl2br(mailer.content)">
+                        </div>
+                    </div>
+
+                </div>
+                <div *ngIf="!mailer" style="color:#aaa;">
+                    <h3>Please select Mailer from the list on the left to view it's data.</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <ng-template #removeMailerEntryTpl let-c="close" let-d="dismiss">
+    <div>
+
+        <div class="modal-header">
+            <h4 class="modal-title">Remove Mailer Entry</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Code</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeMailerEntryData.code}}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Description</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeMailerEntryData.name}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" (click)="c(removeMailerEntryData)">
+                <i class="icon-minus-sign-alt"></i> Remove Mailer
+            </button>
+        </div>
+    </div>
+</ng-template> -->
+
+<ng-template #removeMailerTpl let-c="close" let-d="dismiss">
+    <div>
+        <div class="modal-header">
+            <h4 class="modal-title">Remove Mailer</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="form form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Mailer Name</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeMailerData.name}}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Description</label>
+
+                    <div class="col-md-6">
+                        <p class="form-control-static">{{removeMailerData.name}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+            <button type="button" class="btn btn-round btn-primary" (click)="c(removeMailerData)">
+                <i class="icon-minus-sign-alt"></i> Remove Mailer
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #editMailerTpl let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Add Mailer</h4>
+    </div>
+    <div class="modal-body fix-gutter" #mailerEditForm="ngForm" ngForm>
+        <div class="form-group">
+            <label>Mailer Name</label>
+            <input type="text" class="form-control" [(ngModel)]="editMailerData && editMailerData.name" #name="ngModel" name="name" required>
+            <small class="form-text has-warning" *ngIf="name?.invalid">
+                <span class="help-block" *ngIf="name?.errors?.required">Name is required</span>
+            </small>
+        </div>
+        <!-- <div class="form-group">
+            <label>Mailer Description</label>
+            <input type="text" class="form-control" [(ngModel)]="editMailerData && editMailerData.description" #description="ngModel"
+                name="description" required>
+            <small class="form-text has-warning" *ngIf="description?.invalid">
+                <span class="help-block" *ngIf="description?.errors?.required">Description is required</span>
+            </small>
+        </div> -->
+        <div class="form-group">
+            <label>Subject</label>
+            <input type="text" class="form-control" [(ngModel)]="editMailerData && editMailerData.subject" #subject="ngModel" name="subject"
+                required>
+            <small class="form-text has-warning" *ngIf="subject?.invalid">
+                <span class="help-block" *ngIf="subject?.errors?.required">Subject is required</span>
+            </small>
+        </div>
+        <div class="form-group">
+            <label>Content</label>
+            <textarea class="form-control" rows="4" [(ngModel)]="editMailerData && editMailerData.content" #content="ngModel" name="content"></textarea>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Status *</label>
+
+            <div>
+                <div class="btn-group btn-group-toggle" name="enabled" #enabled="ngModel" ngbRadioGroup [(ngModel)]="editMailerData && editMailerData.enabled">
+                    <label ngbButtonLabel class="btn btn-sm btn-success">
+                        <input type="radio" ngbButton [value]="1" [required]="!editMailerData?.enabled"> Enabled</label>
+                    <label ngbButtonLabel class="btn btn-sm btn-danger">
+                        <input type="radio" ngbButton [value]="0" [required]="!editMailerData?.enabled"> Disabled</label>
+                </div>
+                <small class="form-text has-warning" *ngIf="enabled?.invalid">
+                    <span class="help-block" *ngIf="enabled.errors?.required">Status is required</span>
+                </small>
+
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="shared" [(ngModel)]="editMailerData.shared" name="shared">
+                <label class="custom-control-label" for="shared">Share template</label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-round btn-secondary" (click)="d()">Close</button>
+        <button type="button" class="btn btn-round btn-primary" [disabled]="mailerEditForm.invalid" (click)="c(editMailerData)">
+            <!-- <i class="fa fa-plus"></i>  -->
+            <fa-icon [icon]="['fas','plus']" [fixedWidth]="true"></fa-icon>
+            Save Mailer
+        </button>
+    </div>
+</ng-template>

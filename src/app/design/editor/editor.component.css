@@ -1,0 +1,78 @@
+.grid-animate {
+    transition: all .2s ease-in-out;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.swapStart {
+    animation: blinker .5s linear infinite;
+}
+
+.swapEnd {
+    /*background: #f00;*/
+    opacity: 1;
+    transition: all .5s ease-in;
+}
+
+.disabled-region {
+    opacity: .6;
+    pointer-events: none !important;
+    /*background: rgba(255,255,255,.2);*/
+}
+.element {
+    position: relative;
+}
+.element .element-edit {
+    /* opacity: 0; */
+    display:none;
+    z-index: 4;
+}
+
+.element .element-edit .btn {
+    margin: 0 2px;
+}
+
+.element:hover .element-edit {
+    /* opacity: 1; */
+    display:block;
+}
+
+.element:hover::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, .3);
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.element .element-item {
+    pointer-events: none !important;
+}
+
+.element:hover .element-item {
+    filter: blur(1px);
+}
+.half {opacity: .5;}
+.half::after{
+    content: 'hidden';
+    padding: 3px;
+    font-weight: bold;
+    position: absolute;
+    top: 0px;
+    right: 1em;
+    font-size: .7em;
+}
+.form-group>label,.custom-checkbox>label{ font-size:14px;}
+.leafup{
+    position:absolute;top:100%;left:-1px;border:solid 1px #ccc;padding:4px; border-radius:0 18px 18px 18px; background: white;
+}
+.editor ::ng-deep .clfx{
+    background: #eee; height: 2em; margin-bottom:1rem;
+}
+.nowrap{white-space: nowrap;}

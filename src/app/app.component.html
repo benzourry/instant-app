@@ -1,0 +1,7 @@
+<div *ngIf="updateAvailable" style="background:red;padding:1em; color: white; font-size: .9em" (click)="reload()">
+    Update available! Click this message to update
+    </div>
+<div *ngIf="offline" style="background:red;padding:1em; color: white; font-size: .9em">
+    You are currently offline. Data might be outdated and some of the feature will be disabled.
+    </div>
+<router-outlet></router-outlet>
