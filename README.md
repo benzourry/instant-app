@@ -2,7 +2,7 @@
 
 Instant App is a designer and parser for App Meta.
 
-Instant App was developed with Angular7 + Bootstrap4 + Spring Boot 2 + MariaDB
+Instant App was developed with Angular8 + Bootstrap4 + Spring Boot 2 + MariaDB
 
 
 
